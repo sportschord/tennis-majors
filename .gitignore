@@ -19,3 +19,4 @@ _design/
 # Editor
 .vscode/
 .idea/
+.vercel

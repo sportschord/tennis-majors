@@ -1,0 +1,32 @@
+export interface Final {
+  year: number;
+  w: string;
+  ru: string;
+  s: string;
+  n: string;
+}
+
+export type TournamentKey = "AO" | "RG" | "WB" | "US";
+export type Division = "men" | "women";
+
+export interface TournamentMeta {
+  key: TournamentKey;
+  name: string;
+  venue: string;
+  bg: string;
+  bgDeep: string;
+  accent: string;
+  ball: string;
+}
+
+export interface TweakState {
+  tournament: TournamentKey;
+  division: Division;
+  paperMode: "block" | "paper";
+  indicator: "curl" | "badge" | "ring" | "none";
+  perRow: 4 | 6 | 10;
+  showNat: boolean;
+  showScore: boolean;
+}
+
+export type VizTab = "poster" | "era" | "career" | "fingerprint" | "nations";

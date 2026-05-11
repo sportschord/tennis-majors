@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+body {
+  background: #0e1a2b;
+  color: #f3f5f8;
+}
+
+select option {
+  background: #1a2744;
+  color: #f3f5f8;
+}
+
+@media print {
+  .sidebar,
+  .top-bar {
+    display: none !important;
+  }
+  .viz-area {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  @page {
+    size: A1 portrait;
+    margin: 0;
+  }
+}

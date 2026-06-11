@@ -44,6 +44,11 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
   const maxScChars = Math.max(7, Math.floor(maxScW / charPxApprox));
   const scoreLines = showScore ? splitScore(row.s, maxScChars) : [];
 
+  // textLength forces the EXACT length — it stretches short names as much as
+  // it compresses long ones. Only clamp names whose natural width overflows.
+  const winnerOverflows = row.w.length * nameSize * 0.62 > maxNameW;
+  const runnerOverflows = row.ru.length * ruSize * 0.6 > maxRuW;
+
   return (
     <g>
       {indicator === "curl" && <BallCurl count={priorCount} radius={radius} color={tourn.ball} />}
@@ -60,8 +65,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
         fontWeight="700"
         fontSize={nameSize}
         fill={tourn.bgDeep}
-        textLength={maxNameW}
-        lengthAdjust="spacingAndGlyphs"
+        {...(winnerOverflows ? { textLength: maxNameW, lengthAdjust: "spacingAndGlyphs" as const } : {})}
         style={{ letterSpacing: "0.005em" }}
       >
         {row.w}
@@ -78,8 +82,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
         fontWeight="500"
         fontSize={ruSize}
         fill={tourn.bgDeep}
-        textLength={maxRuW}
-        lengthAdjust="spacingAndGlyphs"
+        {...(runnerOverflows ? { textLength: maxRuW, lengthAdjust: "spacingAndGlyphs" as const } : {})}
         opacity="0.95"
       >
         {row.ru}

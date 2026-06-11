@@ -23,8 +23,8 @@ export const EraStreamgraph = forwardRef<SVGSVGElement, Props>(function EraStrea
       TENNIS_DATA[k][division].forEach((row) => all.push({ year: row.year, w: row.w }));
     });
 
-    const yearMin = 1968,
-      yearMax = 2025;
+    const yearMin = 1968;
+    const yearMax = Math.max(...all.map((r) => r.year));
     const yrs: number[] = [];
     for (let y = yearMin; y <= yearMax; y++) yrs.push(y);
 
@@ -127,8 +127,24 @@ export const EraStreamgraph = forwardRef<SVGSVGElement, Props>(function EraStrea
           }
         }
         if (peak < 0.15) return null;
-        const cx = xScale(peakI);
-        const cy = (yScale(stack[peakI][sIdx].y0) + yScale(stack[peakI][sIdx].y1)) / 2;
+        // Keep the whole label inside the plot: clamp the anchor away from
+        // the edges (streams peaking at the first/last year — e.g. Alcaraz —
+        // otherwise get their label cut at the margin).
+        const halfW = (sr.name.length * 13 * 0.62) / 2 + 10;
+        const cxRaw = xScale(peakI);
+        const cx = Math.min(Math.max(cxRaw, PAD.l + halfW), W - PAD.r - halfW);
+        const li = Math.round(xScale.invert(cx));
+        // Average the band over a 3-index window: curveBasis draws the local
+        // average of the control points, so this lands on the visual centre.
+        let y0s = 0,
+          y1s = 0,
+          n = 0;
+        for (let k = Math.max(0, li - 1); k <= Math.min(years.length - 1, li + 1); k++) {
+          y0s += stack[k][sIdx].y0;
+          y1s += stack[k][sIdx].y1;
+          n++;
+        }
+        const cy = (yScale(y0s / n) + yScale(y1s / n)) / 2;
         return (
           <text
             key={sIdx}

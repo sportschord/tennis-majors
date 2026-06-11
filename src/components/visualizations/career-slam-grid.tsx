@@ -15,6 +15,11 @@ export const CareerSlamGrid = forwardRef<SVGSVGElement, Props>(function CareerSl
   const W = 1188,
     H = 1684;
 
+  const lastYear = useMemo(
+    () => Math.max(...TOURN_KEYS.flatMap((k) => TENNIS_DATA[k][division].map((r) => r.year))),
+    [division]
+  );
+
   const players = useMemo(() => {
     const m: Record<string, Record<TournamentKey, number[]>> = {};
     TOURN_KEYS.forEach((k) => {
@@ -46,7 +51,7 @@ export const CareerSlamGrid = forwardRef<SVGSVGElement, Props>(function CareerSl
         CAREER SLAMS · {division === "men" ? "MEN'S" : "WOMEN'S"} OPEN ERA
       </text>
       <text x={W / 2} y={82} textAnchor="middle" fontFamily="Montserrat" fontWeight="500" fontSize="13" fill="#3E4A5E" style={{ letterSpacing: "0.22em" }}>
-        EVERY MAJOR-FINAL VICTORY BY PLAYER · 1968–2025
+        EVERY MAJOR-FINAL VICTORY BY PLAYER · 1968–{lastYear}
       </text>
 
       <g transform={`translate(0, ${PAD.t - 22})`}>

@@ -79,8 +79,11 @@ export const Poster = memo(
       serviceY: 60,
       centerMark: 14,
     };
+    // Solid chalk-white court lines (real courts aren't subtle): heavy outer
+    // boundary, lighter-weight tramlines/service line.
     const lineColor = paperMode === "paper" ? tourn.bg : "#fff";
-    const lineOpacity = paperMode === "paper" ? { outer: 0.6, tram: 0.42 } : { outer: 0.28, tram: 0.18 };
+    const lineOpacity = paperMode === "paper" ? { outer: 0.85, tram: 0.55 } : { outer: 0.92, tram: 0.85 };
+    const lineWidth = { outer: 10, tram: 5 };
 
     // ~0.66em average caps advance for Playfair Display 700 + 0.02em
     // tracking; clamp long titles (Australian Open) inside the court lines.
@@ -102,17 +105,17 @@ export const Poster = memo(
           {/* Tennis-court frame */}
           <g stroke={lineColor} fill="none" strokeLinecap="square">
             {/* baselines */}
-            <line x1={court.left} y1={court.top} x2={court.right} y2={court.top} strokeWidth="3" opacity={lineOpacity.outer} />
-            <line x1={court.left} y1={court.bottom} x2={court.right} y2={court.bottom} strokeWidth="3" opacity={lineOpacity.outer} />
+            <line x1={court.left} y1={court.top} x2={court.right} y2={court.top} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
+            <line x1={court.left} y1={court.bottom} x2={court.right} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
             {/* doubles sidelines */}
-            <line x1={court.left} y1={court.top} x2={court.left} y2={court.bottom} strokeWidth="3" opacity={lineOpacity.outer} />
-            <line x1={court.right} y1={court.top} x2={court.right} y2={court.bottom} strokeWidth="3" opacity={lineOpacity.outer} />
+            <line x1={court.left} y1={court.top} x2={court.left} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
+            <line x1={court.right} y1={court.top} x2={court.right} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
             {/* singles sidelines — the tramlines */}
-            <line x1={court.tramLeft} y1={court.top} x2={court.tramLeft} y2={court.bottom} strokeWidth="2" opacity={lineOpacity.tram} />
-            <line x1={court.tramRight} y1={court.top} x2={court.tramRight} y2={court.bottom} strokeWidth="2" opacity={lineOpacity.tram} />
+            <line x1={court.tramLeft} y1={court.top} x2={court.tramLeft} y2={court.bottom} strokeWidth={lineWidth.tram} opacity={lineOpacity.tram} />
+            <line x1={court.tramRight} y1={court.top} x2={court.tramRight} y2={court.bottom} strokeWidth={lineWidth.tram} opacity={lineOpacity.tram} />
             {/* centre marks on each baseline */}
-            <line x1={W / 2} y1={court.top} x2={W / 2} y2={court.top + court.centerMark} strokeWidth="2" opacity={lineOpacity.outer} />
-            <line x1={W / 2} y1={court.bottom} x2={W / 2} y2={court.bottom - court.centerMark} strokeWidth="2" opacity={lineOpacity.outer} />
+            <line x1={W / 2} y1={court.top} x2={W / 2} y2={court.top + 18} strokeWidth={lineWidth.tram} opacity={lineOpacity.outer} />
+            <line x1={W / 2} y1={court.bottom} x2={W / 2} y2={court.bottom - 18} strokeWidth={lineWidth.tram} opacity={lineOpacity.outer} />
           </g>
 
           <g transform={`translate(${PAD_X + yearStripW}, 44)`}>
@@ -156,7 +159,7 @@ export const Poster = memo(
             x2={court.tramRight}
             y2={court.serviceY}
             stroke={lineColor}
-            strokeWidth="2"
+            strokeWidth={lineWidth.tram}
             opacity={lineOpacity.tram}
           />
 
@@ -187,14 +190,30 @@ export const Poster = memo(
                 {isHovered && (
                   <circle r={radius + 4} fill="none" stroke={paperMode === "paper" ? tourn.bg : "#fff"} strokeOpacity="0.9" strokeWidth="2.5" />
                 )}
-                {cIdx === 0 && (
-                  <g transform={`translate(${-radius - 36}, 6)`}>
-                    <text fontFamily="'Playfair Display', Georgia, serif" fontWeight="700" fontSize="16" fill={ink} style={{ letterSpacing: "0.03em" }} opacity="0.95">
-                      {row.year}
-                    </text>
-                  </g>
-                )}
               </g>
+            );
+          })}
+
+          {/* Year markers: a fixed right-aligned column between the tramline
+              and the circles, vertically centred on each row. */}
+          {Array.from({ length: totalRows }, (_, rIdx) => {
+            const first = data[rIdx * cols];
+            if (!first) return null;
+            return (
+              <text
+                key={first.year}
+                x={PAD_X + yearStripW - 18}
+                y={gridTop + cellH * (rIdx + 0.5) + 6}
+                textAnchor="end"
+                fontFamily="'Playfair Display', Georgia, serif"
+                fontWeight="700"
+                fontSize="17"
+                fill={ink}
+                style={{ letterSpacing: "0.02em" }}
+                opacity="0.95"
+              >
+                {first.year}
+              </text>
             );
           })}
 

@@ -13,8 +13,10 @@ export function TennisBall({ size = 18, color = "#D6DD30" }: { size?: number; co
 export function BallCurl({ count, radius, color }: { count: number; radius: number; color: string }) {
   if (count <= 0) return null;
   const r = radius + 8;
-  const startDeg = 10;
-  const stepDeg = 18;
+  // Curl UP the right shoulder and over the top (negative = counter-clockwise
+  // in SVG): the zone below the circle belongs to the nationality code.
+  const startDeg = -12;
+  const stepDeg = -15;
   return (
     <g>
       {Array.from({ length: count }, (_, i) => {

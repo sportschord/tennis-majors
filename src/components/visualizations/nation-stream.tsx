@@ -23,8 +23,8 @@ export const NationStream = forwardRef<SVGSVGElement, Props>(function NationStre
       TENNIS_DATA[k][division].forEach((r) => all.push({ year: r.year, n: r.n }));
     });
 
-    const yearMin = 1968,
-      yearMax = 2025;
+    const yearMin = 1968;
+    const yearMax = Math.max(...all.map((r) => r.year));
     const yrs: number[] = [];
     for (let y = yearMin; y <= yearMax; y++) yrs.push(y);
 

@@ -107,9 +107,6 @@ export const CareerSlamGrid = forwardRef<SVGSVGElement, Props>(function CareerSl
         );
       })}
 
-      <text x={W / 2} y={H - 80} textAnchor="middle" fontFamily="Montserrat" fontWeight="600" fontSize="14" fill="#3E4A5E" style={{ letterSpacing: "0.22em" }}>
-        SPORTSCHORD · DATA VISUALISATION DESIGN
-      </text>
     </svg>
   );
 });

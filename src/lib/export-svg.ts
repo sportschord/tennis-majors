@@ -22,12 +22,19 @@ export const EXPORT_PRESETS: ExportPreset[] = [
   { id: "svg", label: "SVG · Vector", description: "Fonts embedded — design iteration" },
 ];
 
-let fontDataUriCache: string | null = null;
+/** Every font family painted inside the poster SVGs — all must be embedded. */
+const EMBEDDED_FONTS = [
+  { family: "Montserrat", path: "/fonts/montserrat-var.woff2" },
+  { family: "Playfair Display", path: "/fonts/playfair-var.woff2" },
+];
 
-async function getFontDataUri(): Promise<string> {
-  if (fontDataUriCache) return fontDataUriCache;
-  const res = await fetch("/fonts/montserrat-var.woff2");
-  if (!res.ok) throw new Error(`Font fetch failed (${res.status})`);
+const fontDataUriCache = new Map<string, string>();
+
+async function getFontDataUri(path: string): Promise<string> {
+  const cached = fontDataUriCache.get(path);
+  if (cached) return cached;
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`Font fetch failed (${res.status}) for ${path}`);
   const buf = await res.arrayBuffer();
   const bytes = new Uint8Array(buf);
   let binary = "";
@@ -35,8 +42,19 @@ async function getFontDataUri(): Promise<string> {
   for (let i = 0; i < bytes.length; i += CHUNK) {
     binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
   }
-  fontDataUriCache = `data:font/woff2;base64,${btoa(binary)}`;
-  return fontDataUriCache;
+  const uri = `data:font/woff2;base64,${btoa(binary)}`;
+  fontDataUriCache.set(path, uri);
+  return uri;
+}
+
+async function buildFontFaceCss(): Promise<string> {
+  const rules = await Promise.all(
+    EMBEDDED_FONTS.map(async ({ family, path }) => {
+      const uri = await getFontDataUri(path);
+      return `@font-face{font-family:"${family}";font-style:normal;font-weight:100 900;src:url("${uri}") format("woff2");}`;
+    })
+  );
+  return rules.join("");
 }
 
 interface SerializedSvg {
@@ -59,9 +77,8 @@ async function serializeWithFonts(svg: SVGSVGElement): Promise<SerializedSvg> {
   clone.setAttribute("height", String(height));
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
-  const fontUri = await getFontDataUri();
   const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
-  style.textContent = `@font-face{font-family:"Montserrat";font-style:normal;font-weight:100 900;src:url("${fontUri}") format("woff2");}`;
+  style.textContent = await buildFontFaceCss();
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   defs.appendChild(style);
   clone.insertBefore(defs, clone.firstChild);

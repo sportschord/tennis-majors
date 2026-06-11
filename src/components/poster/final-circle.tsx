@@ -14,9 +14,11 @@ interface FinalCircleProps {
   indicator: "curl" | "badge" | "ring" | "none";
   showNat: boolean;
   showScore: boolean;
+  /** Mode-aware nationality color — white on block, deep ink on paper. */
+  natFill?: string;
 }
 
-export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat, showScore }: FinalCircleProps) {
+export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat, showScore, natFill = "rgba(255,255,255,0.92)" }: FinalCircleProps) {
   const priorCount = countPriorTitles(rows, idx);
   const isRepeat = priorCount > 0;
 
@@ -65,7 +67,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
         {row.w}
       </text>
 
-      <text textAnchor="middle" y={vsY + vsSize * 0.34} fontFamily="Montserrat" fontWeight="400" fontSize={vsSize} fill={tourn.bgDeep} opacity="0.7">
+      <text textAnchor="middle" y={vsY + vsSize * 0.34} fontFamily="Montserrat" fontWeight="400" fontSize={vsSize} fill={tourn.bgDeep} opacity="0.55">
         vs
       </text>
 
@@ -104,9 +106,10 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
           textAnchor="middle"
           y={radius + natSize * 1.7}
           fontFamily="Montserrat"
-          fontWeight="700"
+          fontWeight="600"
           fontSize={natSize}
-          fill="rgba(255,255,255,0.92)"
+          fill={natFill}
+          opacity="0.9"
           style={{ letterSpacing: "0.18em" }}
         >
           {row.n}

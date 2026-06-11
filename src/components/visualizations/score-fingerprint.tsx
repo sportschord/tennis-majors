@@ -83,9 +83,6 @@ export const ScoreFingerprint = forwardRef<SVGSVGElement, Props>(function ScoreF
         </text>
       </g>
 
-      <text x={W / 2} y={H - 60} textAnchor="middle" fontFamily="Montserrat" fontWeight="600" fontSize="12" fill="rgba(255,255,255,0.7)" style={{ letterSpacing: "0.32em" }}>
-        SPORTSCHORD · DATA VISUALISATION DESIGN
-      </text>
     </svg>
   );
 });

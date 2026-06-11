@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="preload" href="/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/playfair-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="antialiased min-h-screen">{children}</body>
     </html>

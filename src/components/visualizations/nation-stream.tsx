@@ -119,9 +119,6 @@ export const NationStream = forwardRef<SVGSVGElement, Props>(function NationStre
           );
         })}
 
-      <text x={W - 40} y={H - 24} textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="11" fill="#3E4A5E" style={{ letterSpacing: "0.22em" }}>
-        SPORTSCHORD · DATA VISUALISATION DESIGN
-      </text>
     </svg>
   );
 });

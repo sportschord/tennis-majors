@@ -196,9 +196,6 @@ export const EraStreamgraph = forwardRef<SVGSVGElement, Props>(function EraStrea
         ))}
       </g>
 
-      <text x={W - PAD.r} y={H - 14} textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="11" fill="#3E4A5E" style={{ letterSpacing: "0.22em" }}>
-        SPORTSCHORD · DATA VISUALISATION DESIGN
-      </text>
     </svg>
   );
 });

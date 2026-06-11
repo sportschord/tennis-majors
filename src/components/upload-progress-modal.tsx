@@ -17,12 +17,18 @@ export interface BatchDestination {
   folderId: string;
 }
 
+export interface IntakeStatus {
+  status: "active" | "done" | "error" | "skipped";
+  message: string;
+}
+
 interface Props {
   open: boolean;
   running: boolean;
   items: BatchItem[];
   logs: string[];
   destination: BatchDestination | null;
+  intakes: IntakeStatus[];
   error: string | null;
   onClose: () => void;
 }
@@ -36,7 +42,7 @@ function StatusIcon({ status }: { status: BatchItem["status"] }) {
 }
 
 /** Progress modal for the batch Drive export (lean port of f1app's UploadProgressModal). */
-export function UploadProgressModal({ open, running, items, logs, destination, error, onClose }: Props) {
+export function UploadProgressModal({ open, running, items, logs, destination, intakes, error, onClose }: Props) {
   if (!open) return null;
 
   const done = items.filter((i) => i.status === "done").length;
@@ -85,6 +91,30 @@ export function UploadProgressModal({ open, running, items, logs, destination, e
             </div>
           ))}
         </div>
+
+        {intakes.length > 0 && (
+          <div className="mt-3 border-t border-white/10 pt-2.5">
+            <div className="text-[9px] font-bold tracking-[0.18em] text-white/35 uppercase mb-1.5">Prodigi intake</div>
+            {intakes.map((intake, i) => (
+              <div key={i} className="flex items-start gap-2 py-0.5">
+                <span className="mt-0.5">
+                  {intake.status === "active" ? (
+                    <span className="inline-block w-3 h-3 rounded-full border-2 border-white/25 border-t-white animate-spin" />
+                  ) : intake.status === "done" ? (
+                    <span className="text-emerald-400 text-[11px]">✓</span>
+                  ) : intake.status === "error" ? (
+                    <span className="text-red-400 text-[11px]">✗</span>
+                  ) : (
+                    <span className="text-white/40 text-[11px]">○</span>
+                  )}
+                </span>
+                <span className={`text-[11px] leading-snug ${intake.status === "error" ? "text-red-300" : "text-white/70"}`}>
+                  {intake.message}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {error && <div className="mt-3 text-[11px] text-red-300">{error}</div>}
 

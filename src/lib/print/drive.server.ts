@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { google, type drive_v3 } from "googleapis";
-import { buildDesignFolderName, type PrintRenderOptions } from "./options";
+import { buildDesignFolderName, SECTION_FOLDER, type PrintRenderOptions } from "./options";
 import type { RenderedPrint } from "./render.server";
 
 /**
@@ -14,8 +14,6 @@ import type { RenderedPrint } from "./render.server";
  * expects for A-series prints; the design folder name becomes the
  * globally-unique design name on ingest.
  */
-
-const SECTION_FOLDER = "Tennis Majors";
 
 interface OAuthConfig {
   authType: "oauth2";

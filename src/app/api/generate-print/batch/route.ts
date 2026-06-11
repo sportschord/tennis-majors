@@ -4,6 +4,13 @@ import { isAuthorizedPrintRequest, UNAUTHORIZED_PRINT_BODY } from "@/lib/print/a
 import { buildDesignFolderName, type PrintRenderOptions, type PrintFormat } from "@/lib/print/options";
 import { launchBrowser, renderPrintOnPage, getBaseUrl } from "@/lib/print/render.server";
 import { uploadPrintToDrive, type DriveUploadResult } from "@/lib/print/drive.server";
+import {
+  buildIntakeAsset,
+  getProdigiConfig,
+  triggerProdigiIntake,
+  waitForProdigiIntake,
+  type ProdigiIntakeAsset,
+} from "@/lib/print/prodigi.server";
 import { DEFAULT_TWEAKS } from "@/lib/url-state";
 
 export const dynamic = "force-dynamic";
@@ -98,6 +105,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         browser = await launchBrowser();
         const page = await browser.newPage();
         let lastDestination: Record<string, unknown> | null = null;
+        const uploadedAssets: ProdigiIntakeAsset[] = [];
 
         for (const combo of combinations) {
           const tweaks: TweakState = {
@@ -131,6 +139,7 @@ export async function POST(request: NextRequest): Promise<Response> {
             try {
               const rendered = await renderPrintOnPage(page, baseUrl, options);
               const driveFile: DriveUploadResult = await uploadPrintToDrive(rendered);
+              uploadedAssets.push(buildIntakeAsset(designName, `A.${format}`, driveFile.id));
               lastDestination = {
                 folderId: driveFile.folderId,
                 folderPath: driveFile.folderPath,
@@ -158,6 +167,43 @@ export async function POST(request: NextRequest): Promise<Response> {
               const message = err instanceof Error ? err.message : "Unknown error";
               send({ type: "item", key, fileName: label, status: "error", error: message });
               logBatch("error", { msg: "item_fail", designName, format, error: message });
+            }
+          }
+        }
+
+        // Register the uploaded assets with the prints-orchestrator so they
+        // appear as catalog designs without a manual Drive scan. Opt-in:
+        // without ORCHESTRATOR_API_TOKEN this degrades to a "skipped" notice.
+        if (uploadedAssets.length > 0) {
+          const prodigi = getProdigiConfig();
+          if (!prodigi) {
+            send({
+              type: "intake",
+              status: "skipped",
+              message: "Orchestrator intake skipped (no ORCHESTRATOR_API_TOKEN) — scan the Drive folder from the Designs page.",
+            });
+          } else {
+            try {
+              send({ type: "intake", status: "active", message: `Registering ${uploadedAssets.length} assets with the prints-orchestrator…` });
+              const job = await triggerProdigiIntake(prodigi, uploadedAssets);
+              const settled = await waitForProdigiIntake(prodigi, job.id);
+              if (settled?.status === "completed") {
+                send({ type: "intake", status: "done", message: "Designs registered in the prints-orchestrator.", jobId: job.id });
+              } else if (settled?.status === "failed" || settled?.status === "cancelled") {
+                send({ type: "intake", status: "error", message: settled.errorMessage || `Orchestrator import ${settled.status}.`, jobId: job.id });
+              } else {
+                send({
+                  type: "intake",
+                  status: "done",
+                  message: `Import still running in the orchestrator (job ${job.id}) — it finishes in the background.`,
+                  jobId: job.id,
+                });
+              }
+              logBatch("info", { msg: "intake_done", jobId: job.id, status: settled?.status ?? "running" });
+            } catch (err) {
+              const message = err instanceof Error ? err.message : "Unknown error";
+              send({ type: "intake", status: "error", message: `Orchestrator intake failed: ${message}` });
+              logBatch("error", { msg: "intake_fail", error: message });
             }
           }
         }

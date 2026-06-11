@@ -5,7 +5,7 @@ import type { TweakState, TournamentKey, Division } from "@/lib/types";
 import { TOURNAMENT_ORDER } from "@/lib/tournaments";
 import { EXPORT_PRESETS, exportSvgElement, type ExportPreset } from "@/lib/export-svg";
 import { encodeState } from "@/lib/url-state";
-import { UploadProgressModal, type BatchItem, type BatchDestination } from "./upload-progress-modal";
+import { UploadProgressModal, type BatchItem, type BatchDestination, type IntakeStatus } from "./upload-progress-modal";
 
 interface Props {
   svgRef: React.RefObject<SVGSVGElement | null>;
@@ -40,6 +40,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
   const [items, setItems] = useState<BatchItem[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [destination, setDestination] = useState<BatchDestination | null>(null);
+  const [intakes, setIntakes] = useState<IntakeStatus[]>([]);
   const [batchError, setBatchError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -126,6 +127,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
     );
     setLogs([]);
     setDestination(null);
+    setIntakes([]);
     setBatchError(null);
     setModalOpen(true);
     setRunning(true);
@@ -195,6 +197,18 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
               );
             } else if (event.type === "log") {
               setLogs((prev) => [...prev, String(event.message)]);
+            } else if (event.type === "intake") {
+              const next: IntakeStatus = {
+                status: event.status as IntakeStatus["status"],
+                message: String(event.message),
+              };
+              // One row per chunk: "active" replaces the previous row for the
+              // running chunk; settled states append-or-replace it.
+              setIntakes((prev) => {
+                const last = prev[prev.length - 1];
+                if (last && last.status === "active") return [...prev.slice(0, -1), next];
+                return [...prev, next];
+              });
             } else if (event.type === "complete" && event.drive) {
               const drive = event.drive as Record<string, unknown>;
               setDestination({
@@ -301,6 +315,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
         items={items}
         logs={logs}
         destination={destination}
+        intakes={intakes}
         error={batchError}
         onClose={() => setModalOpen(false)}
       />

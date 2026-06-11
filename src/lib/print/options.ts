@@ -18,6 +18,9 @@ export interface PrintRenderOptions {
 /** Pixels per mm at CSS 96dpi — used to size PDF pages from mm dimensions. */
 const CSS_PX_PER_MM = 96 / 25.4;
 
+/** Drive section folder — also the `section` the prints-orchestrator ingests. */
+export const SECTION_FOLDER = "Tennis Majors";
+
 export function parsePrintOptions(params: URLSearchParams): PrintRenderOptions {
   const { tweaks, viz } = decodeState(params.toString());
   const format: PrintFormat = params.get("format") === "pdf" ? "pdf" : "png";

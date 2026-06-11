@@ -15,7 +15,7 @@
 
 ## Can wait until the end
 
-- [ ] **Auto-trigger prodigi intake after batch upload** — blocked on the orchestrator only accepting admin-session auth; needs a machine-token path on `/api/listings/physical/drive/import` (separate repo task spawned).
+- [x] **Auto-trigger prodigi intake after batch upload** — DONE. The orchestrator accepts `Bearer ORCHESTRATOR_API_TOKEN` (its PR #79); the Tennis batch route now registers uploaded assets via the explicit-assets import and polls the job, with status shown in the progress modal. Works in **production** (token is in Tennis Production env, added by the M2M task). Locally it reports "skipped" — if you want local intake tests, run `vercel env add ORCHESTRATOR_API_TOKEN development` yourself and `vercel env pull .env.local --yes` (I'm intentionally not propagating credentials between environments). The orchestrator URL defaults to `https://etsy-prodigi-bridge.vercel.app` in code; `PRODIGI_ORCHESTRATOR_URL` overrides it if you ever need to.
 - [ ] Watch Vercel function memory on the first production 300-DPI PNG render (7128×10104 ≈ 290MB raster buffer); drop `deviceScaleFactor` to 5 or bump instance memory if it OOMs. PDF masters are cheap and unaffected.
 - [ ] **Refresh the four live Shopify tennis listings** (June 2023 artwork) with the new exports once approved.
 - [ ] Decide whether Era/Career/Nations charts become sellable prints (server PDF/PNG export already works for them; Drive upload is poster-only by design — non-A aspect).

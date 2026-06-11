@@ -7,7 +7,7 @@ import { TOURNAMENTS, DIVISIONS } from "@/lib/tournaments";
 import { DEFAULT_TWEAKS, DEFAULT_VIZ, decodeState, encodeState } from "@/lib/url-state";
 import { Sidebar } from "@/components/sidebar";
 import { VizSelector } from "@/components/viz-selector";
-import { ExportButton } from "@/components/export-button";
+import { PrintControls } from "@/components/print-controls";
 import { Artboard } from "@/components/artboard";
 import { StatusBar } from "@/components/status-bar";
 import { Gallery } from "@/components/gallery";
@@ -111,7 +111,7 @@ export default function Home() {
             {copied ? "Copied ✓" : "Copy link"}
           </button>
 
-          <ExportButton svgRef={svgRef} filename={filename} />
+          <PrintControls svgRef={svgRef} filename={filename} tweaks={tweaks} viz={activeViz} />
         </header>
 
         {activeViz === "gallery" ? (

@@ -29,4 +29,4 @@ export interface TweakState {
   showScore: boolean;
 }
 
-export type VizTab = "poster" | "era" | "career" | "fingerprint" | "nations";
+export type VizTab = "poster" | "gallery" | "era" | "career" | "fingerprint" | "nations";

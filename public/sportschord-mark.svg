@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Sportschord mark">
+  <defs>
+    <clipPath id="sc-circle-clip">
+      <circle cx="100" cy="100" r="96"></circle>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sc-circle-clip)">
+    <circle cx="100" cy="100" r="96" fill="#FFFFFF"></circle>
+
+    
+    <path d="M 4,100 A 96 96 0 0 1 40,24 L 42,32 A 88 88 0 0 0 12,100 Z" fill="#B6DEDB"></path>
+    <path d="M 40,24 A 96 96 0 0 1 92,4 L 92,14 A 88 88 0 0 0 44,32 Z" fill="#7FC4C0"></path>
+    <path d="M 92,4 A 96 96 0 0 1 146,20 L 142,28 A 88 88 0 0 0 92,14 Z" fill="#2B8A86"></path>
+    <path d="M 146,20 A 96 96 0 0 1 182,62 L 174,64 A 88 88 0 0 0 142,28 Z" fill="#1A6B68"></path>
+    <path d="M 182,62 A 96 96 0 0 1 196,100 L 188,100 A 88 88 0 0 0 174,64 Z" fill="#0A3A39"></path>
+
+    
+    <g opacity="0.92" fill="none" stroke-linecap="round">
+      <path d="M 20,60 Q 100,100 70,196" stroke="#B6DEDB" stroke-width="5"></path>
+      <path d="M 32,42 Q 100,100 92,196" stroke="#7FC4C0" stroke-width="6"></path>
+      <path d="M 48,28 Q 100,100 108,196" stroke="#2B8A86" stroke-width="5"></path>
+      <path d="M 72,16 Q 100,100 124,196" stroke="#1A6B68" stroke-width="6"></path>
+      <path d="M 100,10 Q 100,100 140,196" stroke="#4AA8A3" stroke-width="5"></path>
+      <path d="M 128,16 Q 100,100 156,192" stroke="#0F4F4D" stroke-width="5"></path>
+      <path d="M 152,28 Q 100,100 172,180" stroke="#1A6B68" stroke-width="6"></path>
+      <path d="M 172,48 Q 100,100 184,158" stroke="#2B8A86" stroke-width="5"></path>
+    </g>
+
+    
+    <path d="M 12,100 A 88 88 0 0 0 72,184 L 70,196 A 96 96 0 0 1 4,100 Z" fill="#B6DEDB"></path>
+    <path d="M 72,184 A 88 88 0 0 0 188,100 L 196,100 A 96 96 0 0 1 70,196 Z" fill="#7FC4C0" opacity="0.55"></path>
+
+    
+    <rect x="12" y="80" width="176" height="42" fill="#0B0B0C"></rect>
+    <text x="100" y="106" text-anchor="middle" font-family="Montserrat, system-ui, sans-serif" font-weight="700" font-size="20" letter-spacing="4" fill="#FFFFFF">SPORTSCHORD</text>
+  </g>
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#0B0B0C" stroke-width="1" opacity="0.08"></circle>
+</svg>

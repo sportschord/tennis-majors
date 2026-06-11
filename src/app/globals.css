@@ -1,8 +1,34 @@
 @import "tailwindcss";
 
+/* Self-hosted variable font: one file covers every weight used (400-800).
+   The same file is fetched at export time and embedded into serialized SVGs,
+   which is why this is a manual @font-face rather than next/font (next/font
+   hashes the URL, so the export path couldn't reuse the browser-cached file). */
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/montserrat-var.woff2") format("woff2");
+}
+
+@theme {
+  --color-background: #0e1a2b;
+  --color-panel: #13233b;
+  --color-ink: #f3f5f8;
+  --color-brand: #7fc4c0;
+  --font-sans: "Montserrat", system-ui, sans-serif;
+}
+
+:root {
+  /* Tournament-reactive accent — overridden inline from the active tournament */
+  --accent: #c75b2a;
+}
+
 body {
-  background: #0e1a2b;
-  color: #f3f5f8;
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }
 
 select option {
@@ -10,15 +36,99 @@ select option {
   color: #f3f5f8;
 }
 
+/* Custom select chrome (native dropdowns look out of place on the dark shell) */
+.tweak-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+.tweak-select:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Tactile interaction language shared with spotify-poster / golf-majors */
+.interactive-lift {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+.interactive-lift:hover {
+  transform: translateY(-1px);
+}
+.interactive-lift:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.glass-panel {
+  backdrop-filter: blur(18px);
+  background: linear-gradient(160deg, rgba(19, 35, 59, 0.92), rgba(14, 26, 43, 0.88));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Accent-tinted active states (chrome re-themes per slam) */
+.accent-active {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  color: #fff;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-slide-in {
+  animation: fadeSlideIn 200ms ease both;
+}
+
+/* Dark-room table the print proofs sit on */
+.viz-area {
+  background: radial-gradient(1100px 700px at 50% 18%, rgba(255, 255, 255, 0.05), transparent 65%);
+}
+
+.poster-tooltip {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  max-width: 280px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-lift,
+  .fade-slide-in {
+    transition: none;
+    animation: none;
+  }
+  .interactive-lift:hover,
+  .interactive-lift:active {
+    transform: none;
+  }
+}
+
 @media print {
   .sidebar,
-  .top-bar {
+  .top-bar,
+  .status-bar,
+  .artboard-toolbar {
     display: none !important;
   }
   .viz-area {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: none;
   }
   @page {
     size: A1 portrait;

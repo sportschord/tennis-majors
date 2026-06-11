@@ -1,7 +1,7 @@
 "use client";
 
 import type { TweakState, TournamentKey, Division } from "@/lib/types";
-import { TOURNAMENTS, DIVISIONS } from "@/lib/tournaments";
+import { TOURNAMENTS, DIVISIONS, TOURNAMENT_ORDER } from "@/lib/tournaments";
 import { Poster } from "./poster/poster";
 
 interface GalleryProps {
@@ -9,7 +9,6 @@ interface GalleryProps {
   onSelect: (tournament: TournamentKey, division: Division) => void;
 }
 
-const TOURNAMENT_ORDER: TournamentKey[] = ["AO", "RG", "WB", "US"];
 const DIVISION_ORDER: Division[] = ["men", "women"];
 
 /**

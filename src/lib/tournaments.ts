@@ -39,6 +39,9 @@ export const TOURNAMENTS: Record<TournamentKey, TournamentMeta> = {
   },
 };
 
+/** Canonical calendar order — shared by the gallery, status bar, and URL validation. */
+export const TOURNAMENT_ORDER: readonly TournamentKey[] = ["AO", "RG", "WB", "US"];
+
 export const DIVISIONS: Record<Division, { label: string }> = {
   men: { label: "Men's Singles" },
   women: { label: "Women's Singles" },

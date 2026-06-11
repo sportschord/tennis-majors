@@ -1,4 +1,5 @@
-import type { TweakState, VizTab, TournamentKey, Division } from "./types";
+import type { TweakState, VizTab, Division } from "./types";
+import { TOURNAMENT_ORDER } from "./tournaments";
 
 export const DEFAULT_TWEAKS: TweakState = {
   tournament: "RG",
@@ -12,7 +13,6 @@ export const DEFAULT_TWEAKS: TweakState = {
 
 export const DEFAULT_VIZ: VizTab = "poster";
 
-const TOURNAMENT_VALUES: readonly TournamentKey[] = ["AO", "RG", "WB", "US"];
 const DIVISION_VALUES: readonly Division[] = ["men", "women"];
 const PAPER_VALUES: readonly TweakState["paperMode"][] = ["block", "paper"];
 const INDICATOR_VALUES: readonly TweakState["indicator"][] = ["curl", "badge", "ring", "none"];
@@ -43,7 +43,7 @@ export function decodeState(search: string): { tweaks: TweakState; viz: VizTab }
   return {
     viz: pick(params.get("viz"), VIZ_VALUES, DEFAULT_VIZ),
     tweaks: {
-      tournament: pick(params.get("tourn"), TOURNAMENT_VALUES, DEFAULT_TWEAKS.tournament),
+      tournament: pick(params.get("tourn"), TOURNAMENT_ORDER, DEFAULT_TWEAKS.tournament),
       division: pick(params.get("div"), DIVISION_VALUES, DEFAULT_TWEAKS.division),
       paperMode: pick(params.get("paper"), PAPER_VALUES, DEFAULT_TWEAKS.paperMode),
       indicator: pick(params.get("ind"), INDICATOR_VALUES, DEFAULT_TWEAKS.indicator),

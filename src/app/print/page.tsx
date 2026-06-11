@@ -8,14 +8,7 @@ import { EraStreamgraph } from "@/components/visualizations/era-streamgraph";
 import { CareerSlamGrid } from "@/components/visualizations/career-slam-grid";
 import { ScoreFingerprint } from "@/components/visualizations/score-fingerprint";
 import { NationStream } from "@/components/visualizations/nation-stream";
-
-const VIZ_DIMS: Record<Exclude<VizTab, "gallery">, { w: number; h: number }> = {
-  poster: { w: 1188, h: 1684 },
-  era: { w: 1600, h: 900 },
-  career: { w: 1188, h: 1684 },
-  fingerprint: { w: 1188, h: 1684 },
-  nations: { w: 1600, h: 900 },
-};
+import { VIZ_DIMS } from "@/lib/viz-dims";
 
 /**
  * Chrome-free render target for headless capture (mirrors f1app's

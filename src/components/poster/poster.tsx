@@ -65,6 +65,12 @@ export const Poster = memo(
     const hoveredRow = hover ? data[hover.idx] : null;
     const hoveredPrior = hover ? countPriorTitles(data, hover.idx) : 0;
 
+    // ~0.72em average advance for Montserrat 800 + 0.06em tracking; clamp
+    // long titles (Australian Open) inside the inner border via textLength.
+    const footerTitle = `${tourn.name.toUpperCase()} CHAMPIONS`;
+    const footerTitleMaxW = W - 120;
+    const footerTitleClamped = footerTitle.length * 78 * 0.72 > footerTitleMaxW;
+
     return (
       <div className="relative w-full">
         <svg
@@ -132,8 +138,16 @@ export const Poster = memo(
               <g
                 key={i}
                 transform={`translate(${cx},${cy})`}
-                onMouseEnter={interactive ? (e) => setHover({ idx: i, x: e.clientX, y: e.clientY }) : undefined}
-                onMouseMove={interactive ? (e) => setHover({ idx: i, x: e.clientX, y: e.clientY }) : undefined}
+                // Anchor the tooltip to the circle on enter (not the cursor):
+                // avoids a full poster re-render per mousemove frame.
+                onMouseEnter={
+                  interactive
+                    ? (e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHover({ idx: i, x: rect.right, y: rect.top });
+                      }
+                    : undefined
+                }
                 onMouseLeave={interactive ? () => setHover(null) : undefined}
                 style={interactive ? { cursor: "pointer" } : undefined}
               >
@@ -154,26 +168,17 @@ export const Poster = memo(
 
           <rect x="0" y={H - FOOT_H} width={W} height={FOOT_H} fill={tourn.bgDeep} />
           <g transform={`translate(${W / 2}, ${H - FOOT_H + 88})`}>
-            {(() => {
-              const title = `${tourn.name.toUpperCase()} CHAMPIONS`;
-              // ~0.72em average advance for Montserrat 800 + 0.06em tracking;
-              // clamp long titles (Australian Open) inside the inner border.
-              const estWidth = title.length * 78 * 0.72;
-              const maxWidth = W - 120;
-              return (
-                <text
-                  textAnchor="middle"
-                  fontFamily="Montserrat"
-                  fontWeight="800"
-                  fontSize="78"
-                  fill="#fff"
-                  style={{ letterSpacing: "0.06em" }}
-                  {...(estWidth > maxWidth ? { textLength: maxWidth, lengthAdjust: "spacingAndGlyphs" as const } : {})}
-                >
-                  {title}
-                </text>
-              );
-            })()}
+            <text
+              textAnchor="middle"
+              fontFamily="Montserrat"
+              fontWeight="800"
+              fontSize="78"
+              fill="#fff"
+              style={{ letterSpacing: "0.06em" }}
+              {...(footerTitleClamped ? { textLength: footerTitleMaxW, lengthAdjust: "spacingAndGlyphs" as const } : {})}
+            >
+              {footerTitle}
+            </text>
             <text textAnchor="middle" y="56" fontFamily="Montserrat" fontWeight="600" fontSize="26" fill="rgba(255,255,255,0.92)" style={{ letterSpacing: "0.22em" }}>
               {tourn.venue.toUpperCase()} · {DIVISIONS[division].label.toUpperCase()}
             </text>
@@ -187,8 +192,8 @@ export const Poster = memo(
           <div
             className="poster-tooltip glass-panel rounded-lg px-3.5 py-3"
             style={{
-              left: Math.min(hover.x + 14, (typeof window !== "undefined" ? window.innerWidth : 1200) - 300),
-              top: hover.y + 14,
+              left: Math.max(8, Math.min(hover.x + 10, window.innerWidth - 296)),
+              top: Math.max(8, Math.min(hover.y, window.innerHeight - 160)),
             }}
           >
             <div className="text-[10px] font-bold tracking-[0.2em] text-white/45">

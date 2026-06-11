@@ -1,7 +1,7 @@
 "use client";
 
 import type { TweakState, VizTab, TournamentKey } from "@/lib/types";
-import { TOURNAMENTS, DIVISIONS } from "@/lib/tournaments";
+import { TOURNAMENTS, DIVISIONS, TOURNAMENT_ORDER } from "@/lib/tournaments";
 
 interface Props {
   tweaks: TweakState;
@@ -9,8 +9,6 @@ interface Props {
   dims: { w: number; h: number };
   onSelectTournament: (key: TournamentKey) => void;
 }
-
-const TOURNAMENT_ORDER: TournamentKey[] = ["AO", "RG", "WB", "US"];
 
 const VIZ_LABELS: Record<VizTab, string> = {
   poster: "POSTER",

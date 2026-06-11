@@ -4,6 +4,7 @@ import type { VizTab } from "@/lib/types";
 
 const TABS: { value: VizTab; label: string }[] = [
   { value: "poster", label: "Poster" },
+  { value: "gallery", label: "The Series" },
   { value: "era", label: "Era Dominance" },
   { value: "career", label: "Career Slams" },
   { value: "fingerprint", label: "Fingerprints" },
@@ -22,8 +23,9 @@ export function VizSelector({ active, onChange }: Props) {
         <button
           key={tab.value}
           onClick={() => onChange(tab.value)}
-          className={`px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide transition-colors ${
-            active === tab.value ? "bg-white/15 text-white" : "text-white/50 hover:text-white/70 hover:bg-white/5"
+          aria-pressed={active === tab.value}
+          className={`interactive-lift px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide transition-colors ${
+            active === tab.value ? "accent-active" : "text-white/50 hover:text-white/70 hover:bg-white/5"
           }`}
         >
           {tab.label}

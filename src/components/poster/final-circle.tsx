@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { Final, TournamentMeta } from "@/lib/types";
 import { countPriorTitles, splitScore } from "@/lib/utils";
 import { BallCurl, CountBadge, DotRing } from "./indicators";
@@ -15,7 +16,7 @@ interface FinalCircleProps {
   showScore: boolean;
 }
 
-export function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat, showScore }: FinalCircleProps) {
+export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat, showScore }: FinalCircleProps) {
   const priorCount = countPriorTitles(rows, idx);
   const isRepeat = priorCount > 0;
 
@@ -113,4 +114,4 @@ export function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat,
       )}
     </g>
   );
-}
+});

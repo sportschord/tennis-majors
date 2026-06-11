@@ -38,8 +38,10 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
         type="button"
         role="switch"
         aria-checked={value}
+        aria-label={label}
         onClick={() => onChange(!value)}
-        className={`relative w-8 h-[18px] rounded-full transition-colors ${value ? "bg-emerald-500" : "bg-white/15"}`}
+        className="relative w-8 h-[18px] rounded-full transition-colors"
+        style={{ background: value ? "var(--accent)" : "rgba(255,255,255,0.15)" }}
       >
         <span className={`absolute top-[2px] left-[2px] w-[14px] h-[14px] rounded-full bg-white shadow transition-transform ${value ? "translate-x-[14px]" : ""}`} />
       </button>
@@ -50,13 +52,13 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
 export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
   return (
     <>
-      {open && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onClose} />}
+      {open && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />}
       <aside
         className={`fixed top-0 left-0 h-full w-[280px] bg-[#0E1A2B]/95 backdrop-blur-xl border-r border-white/10 z-50 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <span className="text-xs font-semibold tracking-[0.06em] text-white/80 uppercase">Tweaks</span>
-          <button onClick={onClose} className="lg:hidden text-white/50 hover:text-white text-lg leading-none">
+          <button onClick={onClose} aria-label="Close tweaks panel" className="lg:hidden text-white/50 hover:text-white text-lg leading-none">
             ✕
           </button>
         </div>
@@ -69,12 +71,13 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
                   <button
                     key={t.value}
                     onClick={() => onTweak("tournament", t.value)}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded text-[11px] font-medium transition-colors ${
-                      tweaks.tournament === t.value ? "bg-white/15 text-white" : "text-white/50 hover:bg-white/5 hover:text-white/70"
+                    aria-pressed={tweaks.tournament === t.value}
+                    className={`interactive-lift flex items-center gap-2 px-2 py-1.5 rounded text-[11px] font-medium transition-colors ${
+                      tweaks.tournament === t.value ? "accent-active" : "text-white/50 hover:bg-white/5 hover:text-white/70"
                     }`}
                   >
                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                    {t.label.split(" ").pop()}
+                    {t.label.replace("Australian Open", "Aus Open")}
                   </button>
                 ))}
               </div>
@@ -86,8 +89,9 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
                   <button
                     key={d}
                     onClick={() => onTweak("division", d)}
-                    className={`flex-1 py-1.5 rounded text-[11px] font-medium transition-colors ${
-                      tweaks.division === d ? "bg-white/15 text-white" : "text-white/50 hover:bg-white/5"
+                    aria-pressed={tweaks.division === d}
+                    className={`interactive-lift flex-1 py-1.5 rounded text-[11px] font-medium transition-colors ${
+                      tweaks.division === d ? "accent-active" : "text-white/50 hover:bg-white/5"
                     }`}
                   >
                     {d === "men" ? "Men's" : "Women's"}
@@ -105,8 +109,9 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
                   <button
                     key={m}
                     onClick={() => onTweak("paperMode", m)}
-                    className={`flex-1 py-1.5 rounded text-[11px] font-medium capitalize transition-colors ${
-                      tweaks.paperMode === m ? "bg-white/15 text-white" : "text-white/50 hover:bg-white/5"
+                    aria-pressed={tweaks.paperMode === m}
+                    className={`interactive-lift flex-1 py-1.5 rounded text-[11px] font-medium capitalize transition-colors ${
+                      tweaks.paperMode === m ? "accent-active" : "text-white/50 hover:bg-white/5"
                     }`}
                   >
                     {m}
@@ -119,7 +124,8 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
               <select
                 value={tweaks.indicator}
                 onChange={(e) => onTweak("indicator", e.target.value as TweakState["indicator"])}
-                className="w-full h-7 px-2 rounded bg-white/10 border border-white/10 text-[11px] text-white/80 outline-none"
+                aria-label="Repeat indicator style"
+                className="tweak-select w-full h-7 px-2 rounded bg-white/10 border border-white/10 text-[11px] text-white/80 outline-none transition-colors"
               >
                 <option value="curl">Ball curl</option>
                 <option value="badge">×N badge</option>
@@ -132,7 +138,8 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
               <select
                 value={String(tweaks.perRow)}
                 onChange={(e) => onTweak("perRow", parseInt(e.target.value, 10) as TweakState["perRow"])}
-                className="w-full h-7 px-2 rounded bg-white/10 border border-white/10 text-[11px] text-white/80 outline-none"
+                aria-label="Grid layout"
+                className="tweak-select w-full h-7 px-2 rounded bg-white/10 border border-white/10 text-[11px] text-white/80 outline-none transition-colors"
               >
                 <option value="6">6 per row (decade)</option>
                 <option value="10">10 per row (era band)</option>

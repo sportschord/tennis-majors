@@ -20,3 +20,4 @@ _design/
 .vscode/
 .idea/
 .vercel
+.env*

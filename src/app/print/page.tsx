@@ -18,13 +18,21 @@ import { VIZ_DIMS } from "@/lib/viz-dims";
  * sized for the requested DPI.
  */
 export default function PrintPage() {
-  const [state, setState] = useState<{ tweaks: TweakState; viz: Exclude<VizTab, "gallery"> } | null>(null);
+  const [state, setState] = useState<{
+    tweaks: TweakState;
+    viz: Exclude<VizTab, "gallery">;
+    width: number | null;
+  } | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
 
   useEffect(() => {
     const { tweaks, viz } = decodeState(window.location.search);
+    // Optional ?w= overrides the render width in CSS px — used by the PDF
+    // path to lay the artwork out at exact page size (594mm ≈ 2245px).
+    const wRaw = parseInt(new URLSearchParams(window.location.search).get("w") ?? "", 10);
+    const width = Number.isFinite(wRaw) ? Math.min(Math.max(wRaw, 100), 8000) : null;
     // The gallery is a browsing view, not a print artifact.
-    setState({ tweaks, viz: viz === "gallery" ? "poster" : viz });
+    setState({ tweaks, viz: viz === "gallery" ? "poster" : viz, width });
     let cancelled = false;
     document.fonts.ready.then(() => {
       if (!cancelled) setFontsReady(true);
@@ -36,8 +44,9 @@ export default function PrintPage() {
 
   if (!state) return null;
 
-  const { tweaks, viz } = state;
-  const dims = VIZ_DIMS[viz];
+  const { tweaks, viz, width } = state;
+  const base = VIZ_DIMS[viz];
+  const dims = width ? { w: width, h: Math.round((width * base.h) / base.w) } : base;
 
   return (
     <div

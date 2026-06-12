@@ -12,7 +12,7 @@ interface PosterProps {
   tournamentKey: TournamentKey;
   division: Division;
   indicator: "curl" | "badge" | "ring" | "none";
-  ballPlacement?: "overlap" | "float";
+  ballPlacement?: "overlap" | "float" | "trail";
   showNat: boolean;
   showScore: boolean;
   paperMode: "block" | "paper";
@@ -140,7 +140,7 @@ export const Poster = memo(
             )}
             {indicator === "badge" && (
               <text textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
-                ×N BADGE · TOTAL TITLES TO DATE
+                NUMBERED BALL · TOTAL TITLES TO DATE
               </text>
             )}
             {indicator === "ring" && (

@@ -135,18 +135,18 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
             </div>
             {tweaks.indicator === "curl" && (
               <div>
-                <Label>Ball crown</Label>
+                <Label>Ball curl</Label>
                 <div className="flex gap-1">
-                  {(["overlap", "float"] as const).map((b) => (
+                  {(["overlap", "float", "trail"] as const).map((b) => (
                     <button
                       key={b}
                       onClick={() => onTweak("ballPlacement", b)}
                       aria-pressed={tweaks.ballPlacement === b}
-                      className={`interactive-lift flex-1 py-1.5 rounded text-[11px] font-medium transition-colors ${
+                      className={`interactive-lift flex-1 py-1.5 rounded text-[11px] font-medium capitalize transition-colors ${
                         tweaks.ballPlacement === b ? "accent-active" : "text-white/50 hover:bg-white/5"
                       }`}
                     >
-                      {b === "overlap" ? "Overlapping" : "Floating"}
+                      {b}
                     </button>
                   ))}
                 </div>

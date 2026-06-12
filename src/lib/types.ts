@@ -24,8 +24,9 @@ export interface TweakState {
   division: Division;
   paperMode: "block" | "paper";
   indicator: "curl" | "badge" | "ring" | "none";
-  /** Ball crown vs circle: bite into the edge, or float just off it. */
-  ballPlacement: "overlap" | "float";
+  /** Ball curl: bite into the edge, float just off it, or trail up from
+   *  beside the nationality code (the original 2023 arrangement). */
+  ballPlacement: "overlap" | "float" | "trail";
   perRow: 4 | 6 | 10;
   showNat: boolean;
   showScore: boolean;

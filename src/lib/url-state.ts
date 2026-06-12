@@ -17,7 +17,7 @@ export const DEFAULT_VIZ: VizTab = "poster";
 const DIVISION_VALUES: readonly Division[] = ["men", "women"];
 const PAPER_VALUES: readonly TweakState["paperMode"][] = ["block", "paper"];
 const INDICATOR_VALUES: readonly TweakState["indicator"][] = ["curl", "badge", "ring", "none"];
-const BALL_VALUES: readonly TweakState["ballPlacement"][] = ["overlap", "float"];
+const BALL_VALUES: readonly TweakState["ballPlacement"][] = ["overlap", "float", "trail"];
 const PER_ROW_VALUES: readonly TweakState["perRow"][] = [4, 6, 10];
 const VIZ_VALUES: readonly VizTab[] = ["poster", "gallery", "era", "career", "fingerprint", "nations"];
 

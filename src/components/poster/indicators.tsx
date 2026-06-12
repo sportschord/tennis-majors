@@ -21,18 +21,24 @@ export function BallSheenDefs() {
 
 /**
  * A tennis ball drawn at the origin. Seams are arcs of circles centred just
- * outside the ball (centre ±1.2r, arc radius 1.05r — endpoints land on the
- * ball's silhouette at x=±0.557r, y=±0.83r), rotated for a natural diagonal.
+ * outside the ball (centre ±1.2r, arc radius 1.05r — endpoints on the
+ * silhouette at x=±0.557r, y=±0.83r), rotated for a natural diagonal. The
+ * endpoints are pulled inside the silhouette by the stroke's cap radius so
+ * the white lines never paint past the ball's edge.
  */
-export function BallDot({ r, color }: { r: number; color: string }) {
+export function BallDot({ r, color, seamOpacity = 0.92 }: { r: number; color: string; seamOpacity?: number }) {
   const seam = Math.max(0.8, r * 0.16);
+  const k = (r - seam * 0.9) / r;
+  const ex = 0.557 * r * k;
+  const ey = 0.83 * r * k;
+  const ar = 1.05 * r * k;
   return (
     <g>
       <circle r={r} fill={color} />
       <circle r={r} fill="url(#ball-sheen)" />
-      <g transform="rotate(-18)" stroke="rgba(255,255,255,0.92)" strokeWidth={seam} fill="none" strokeLinecap="round">
-        <path d={`M ${0.557 * r} ${-0.83 * r} A ${1.05 * r} ${1.05 * r} 0 0 0 ${0.557 * r} ${0.83 * r}`} />
-        <path d={`M ${-0.557 * r} ${-0.83 * r} A ${1.05 * r} ${1.05 * r} 0 0 1 ${-0.557 * r} ${0.83 * r}`} />
+      <g transform="rotate(-18)" stroke={`rgba(255,255,255,${seamOpacity})`} strokeWidth={seam} fill="none" strokeLinecap="round">
+        <path d={`M ${ex} ${-ey} A ${ar} ${ar} 0 0 0 ${ex} ${ey}`} />
+        <path d={`M ${-ex} ${-ey} A ${ar} ${ar} 0 0 1 ${-ex} ${ey}`} />
       </g>
       <circle r={r} fill="none" stroke="rgba(0,0,0,0.16)" strokeWidth={Math.max(0.5, r * 0.08)} />
     </g>
@@ -57,22 +63,27 @@ export function BallCurl({
   count: number;
   radius: number;
   color: string;
-  placement: "overlap" | "float";
+  placement: "overlap" | "float" | "trail";
 }) {
   if (count <= 0) return null;
   // Overlap: balls bite into the circle's edge (a crown resting on the
   // head). Float: balls hover just off it with a visible sliver of field.
+  // Trail: floats too, but winds up from beside the nationality code.
   const ballR = placement === "overlap" ? 5.8 : 5.4;
   const orbit = placement === "overlap" ? radius + 1.5 : radius + 8;
-  // Crown from the top: first ball at 12 o'clock, the rest spilling out
-  // symmetrically left/right in 15° steps. The zone below the circle
-  // belongs to the nationality code.
   const stepDeg = 15;
   return (
     <g>
       {Array.from({ length: count }, (_, i) => {
-        const offset = Math.ceil(i / 2) * (i % 2 === 1 ? 1 : -1);
-        const a = ((-90 + offset * stepDeg) * Math.PI) / 180;
+        // Trail: start just clear of the nationality code (bottom right,
+        // +50°) and wind counter-clockwise up the right shoulder — the
+        // original 2023 series arrangement. Crown: first ball at 12
+        // o'clock, the rest spilling out symmetrically in 15° steps.
+        const deg =
+          placement === "trail"
+            ? 50 - i * stepDeg
+            : -90 + Math.ceil(i / 2) * (i % 2 === 1 ? 1 : -1) * stepDeg;
+        const a = (deg * Math.PI) / 180;
         const x = Math.cos(a) * orbit;
         const y = Math.sin(a) * orbit;
         return (
@@ -85,13 +96,21 @@ export function BallCurl({
   );
 }
 
-export function CountBadge({ count, color }: { count: number; color: string }) {
+/**
+ * Total-titles badge: a numbered tennis ball perched on the circle's
+ * top-right shoulder — real balls carry printed numbers, so the count
+ * reads as part of the object rather than a UI sticker.
+ */
+export function CountBadge({ count, radius, ballColor, ink }: { count: number; radius: number; ballColor: string; ink: string }) {
   if (count <= 0) return null;
+  const r = Math.max(11, radius * 0.26);
+  const label = `×${count + 1}`;
+  const fs = r * (label.length > 2 ? 0.72 : 0.95);
   return (
-    <g transform="translate(58, 52)">
-      <circle r="14" fill="#fff" stroke={color} strokeWidth="2" />
-      <text textAnchor="middle" y="4.5" fontFamily="Montserrat" fontWeight="800" fontSize="14" fill={color}>
-        ×{count + 1}
+    <g transform={`translate(${radius * 0.76}, ${-radius * 0.76})`}>
+      <BallDot r={r} color={ballColor} seamOpacity={0.45} />
+      <text textAnchor="middle" y={fs * 0.34} fontFamily="Montserrat" fontWeight="800" fontSize={fs} fill={ink}>
+        {label}
       </text>
     </g>
   );

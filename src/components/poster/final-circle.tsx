@@ -12,7 +12,7 @@ interface FinalCircleProps {
   radius: number;
   tourn: TournamentMeta;
   indicator: "curl" | "badge" | "ring" | "none";
-  ballPlacement: "overlap" | "float";
+  ballPlacement: "overlap" | "float" | "trail";
   showNat: boolean;
   showScore: boolean;
   /** Mode-aware nationality color — white on block, deep ink on paper. */
@@ -59,7 +59,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
       <circle r={radius} fill="#fff" />
 
       {indicator === "ring" && <DotRing count={priorCount + 1} radius={radius} />}
-      {indicator === "badge" && isRepeat && <CountBadge count={priorCount} color={tourn.bgDeep} />}
+      {indicator === "badge" && isRepeat && <CountBadge count={priorCount} radius={radius} ballColor={tourn.ball} ink={tourn.bgDeep} />}
 
       <text
         textAnchor="middle"

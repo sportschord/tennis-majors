@@ -48,13 +48,20 @@ export const Poster = memo(
     const PAD_X = 70;
     const PAD_TOP = 70;
 
+    // Court-as-frame: the white surround IS the court line. A solid margin
+    // wraps the colour field, and a same-width gap separates the footer band
+    // — boundary and baseline drawn in negative space, not stroked on top.
+    const FRAME = 28;
+    const footerTop = H - FRAME - FOOT_H;
+    const fieldBottom = footerTop - FRAME;
+
     const cols = perRow;
     const totalRows = Math.ceil(data.length / cols);
     const gridW = W - PAD_X * 2 - 60;
     const yearStripW = 60;
     const cellW = gridW / cols;
     const gridTop = PAD_TOP;
-    const gridBottom = H - FOOT_H - 40;
+    const gridBottom = fieldBottom - 34;
     const gridH = gridBottom - gridTop;
     const cellH = Math.min(gridH / totalRows, cellW * 1.05);
     const radius = Math.min(cellW, cellH) * 0.38;
@@ -66,27 +73,8 @@ export const Poster = memo(
     const hoveredRow = hover ? data[hover.idx] : null;
     const hoveredPrior = hover ? countPriorTitles(data, hover.idx) : 0;
 
-    // Court geometry: baselines top/bottom, doubles sidelines at the edge,
-    // singles sidelines (the tramlines) inset, plus centre marks. The header
-    // rule doubles as the service line, spanning tramline to tramline.
-    const court = {
-      left: 26,
-      right: W - 26,
-      tramLeft: 56,
-      tramRight: W - 56,
-      top: 26,
-      bottom: H - FOOT_H - 24,
-      serviceY: 60,
-      centerMark: 14,
-    };
-    // Solid chalk-white court lines (real courts aren't subtle): heavy outer
-    // boundary, lighter-weight tramlines/service line.
-    const lineColor = paperMode === "paper" ? tourn.bg : "#fff";
-    const lineOpacity = paperMode === "paper" ? { outer: 0.85, tram: 0.55 } : { outer: 0.92, tram: 0.85 };
-    const lineWidth = { outer: 10, tram: 5 };
-
     // ~0.66em average caps advance for Playfair Display 700 + 0.02em
-    // tracking; clamp long titles (Australian Open) inside the court lines.
+    // tracking; clamp long titles (Australian Open) inside the frame.
     const footerTitle = `${tourn.name.toUpperCase()} CHAMPIONS`;
     const footerTitleMaxW = W - 120;
     const footerTitleClamped = footerTitle.length * 84 * 0.66 > footerTitleMaxW;
@@ -98,33 +86,32 @@ export const Poster = memo(
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
           height="100%"
-          style={{ display: "block", fontFamily: "Montserrat, system-ui, sans-serif", background: bg }}
+          style={{ display: "block", fontFamily: "Montserrat, system-ui, sans-serif", background: "#fff" }}
         >
-          <rect x="0" y="0" width={W} height={H} fill={bg} />
+          <rect x="0" y="0" width={W} height={H} fill="#fff" />
 
-          {/* Tennis-court frame */}
-          <g stroke={lineColor} fill="none" strokeLinecap="square">
-            {/* baselines */}
-            <line x1={court.left} y1={court.top} x2={court.right} y2={court.top} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
-            <line x1={court.left} y1={court.bottom} x2={court.right} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
-            {/* doubles sidelines */}
-            <line x1={court.left} y1={court.top} x2={court.left} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
-            <line x1={court.right} y1={court.top} x2={court.right} y2={court.bottom} strokeWidth={lineWidth.outer} opacity={lineOpacity.outer} />
-            {/* singles sidelines — the tramlines */}
-            <line x1={court.tramLeft} y1={court.top} x2={court.tramLeft} y2={court.bottom} strokeWidth={lineWidth.tram} opacity={lineOpacity.tram} />
-            <line x1={court.tramRight} y1={court.top} x2={court.tramRight} y2={court.bottom} strokeWidth={lineWidth.tram} opacity={lineOpacity.tram} />
-            {/* centre marks on each baseline */}
-            <line x1={W / 2} y1={court.top} x2={W / 2} y2={court.top + 18} strokeWidth={lineWidth.tram} opacity={lineOpacity.outer} />
-            <line x1={W / 2} y1={court.bottom} x2={W / 2} y2={court.bottom - 18} strokeWidth={lineWidth.tram} opacity={lineOpacity.outer} />
-          </g>
+          {/* Colour field inside the white court frame */}
+          <rect x={FRAME} y={FRAME} width={W - FRAME * 2} height={fieldBottom - FRAME} fill={bg} />
+          {paperMode === "paper" && (
+            <rect
+              x={FRAME}
+              y={FRAME}
+              width={W - FRAME * 2}
+              height={fieldBottom - FRAME}
+              fill="none"
+              stroke={tourn.bg}
+              strokeOpacity="0.5"
+              strokeWidth="2"
+            />
+          )}
 
-          <g transform={`translate(${PAD_X + yearStripW}, 44)`}>
+          <g transform={`translate(${PAD_X + yearStripW}, 58)`}>
             <text fontFamily="Montserrat" fontWeight="700" fontSize="11" fill={ink} opacity="0.85" style={{ letterSpacing: "0.32em" }}>
               OPEN ERA · {data[0].year}–{data[data.length - 1].year} · CHAMPIONS & FINAL SCORES
             </text>
           </g>
 
-          <g transform={`translate(${W - PAD_X}, 50)`}>
+          <g transform={`translate(${W - PAD_X}, 55)`}>
             {indicator === "curl" && (
               <g>
                 <g transform="translate(-32,0)">
@@ -151,17 +138,6 @@ export const Poster = memo(
               </text>
             )}
           </g>
-
-          {/* service line, tramline to tramline */}
-          <line
-            x1={court.tramLeft}
-            y1={court.serviceY}
-            x2={court.tramRight}
-            y2={court.serviceY}
-            stroke={lineColor}
-            strokeWidth={lineWidth.tram}
-            opacity={lineOpacity.tram}
-          />
 
           {data.map((row, i) => {
             const cIdx = i % cols;
@@ -194,7 +170,7 @@ export const Poster = memo(
             );
           })}
 
-          {/* Year markers: a fixed right-aligned column between the tramline
+          {/* Year markers: a fixed right-aligned column between the frame
               and the circles, vertically centred on each row. */}
           {Array.from({ length: totalRows }, (_, rIdx) => {
             const first = data[rIdx * cols];
@@ -217,8 +193,8 @@ export const Poster = memo(
             );
           })}
 
-          <rect x="0" y={H - FOOT_H} width={W} height={FOOT_H} fill={tourn.bgDeep} />
-          <g transform={`translate(${W / 2}, ${H - FOOT_H + 118})`}>
+          <rect x={FRAME} y={footerTop} width={W - FRAME * 2} height={FOOT_H} fill={tourn.bgDeep} />
+          <g transform={`translate(${W / 2}, ${footerTop + 118})`}>
             <text
               textAnchor="middle"
               fontFamily="'Playfair Display', Georgia, serif"

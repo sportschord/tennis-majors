@@ -133,6 +133,25 @@ export function Sidebar({ tweaks, onTweak, open, onClose }: SidebarProps) {
                 <option value="none">None — clean</option>
               </select>
             </div>
+            {tweaks.indicator === "curl" && (
+              <div>
+                <Label>Ball crown</Label>
+                <div className="flex gap-1">
+                  {(["overlap", "float"] as const).map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => onTweak("ballPlacement", b)}
+                      aria-pressed={tweaks.ballPlacement === b}
+                      className={`interactive-lift flex-1 py-1.5 rounded text-[11px] font-medium transition-colors ${
+                        tweaks.ballPlacement === b ? "accent-active" : "text-white/50 hover:bg-white/5"
+                      }`}
+                    >
+                      {b === "overlap" ? "Overlapping" : "Floating"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <Label>Layout</Label>
               <select

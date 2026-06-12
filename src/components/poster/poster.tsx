@@ -5,13 +5,14 @@ import type { TournamentKey, Division } from "@/lib/types";
 import { TENNIS_DATA } from "@/lib/data";
 import { TOURNAMENTS, DIVISIONS } from "@/lib/tournaments";
 import { countPriorTitles } from "@/lib/utils";
-import { TennisBall } from "./indicators";
+import { BallSheenDefs, TennisBall } from "./indicators";
 import { FinalCircle } from "./final-circle";
 
 interface PosterProps {
   tournamentKey: TournamentKey;
   division: Division;
   indicator: "curl" | "badge" | "ring" | "none";
+  ballPlacement?: "overlap" | "float";
   showNat: boolean;
   showScore: boolean;
   paperMode: "block" | "paper";
@@ -42,7 +43,7 @@ function ordinal(n: number): string {
 
 export const Poster = memo(
   forwardRef<SVGSVGElement, PosterProps>(function Poster(
-    { tournamentKey, division, indicator, showNat, showScore, paperMode, perRow, interactive = false },
+    { tournamentKey, division, indicator, ballPlacement = "overlap", showNat, showScore, paperMode, perRow, interactive = false },
     ref
   ) {
     const [hover, setHover] = useState<HoverState | null>(null);
@@ -100,6 +101,7 @@ export const Poster = memo(
           height="100%"
           style={{ display: "block", fontFamily: "Montserrat, system-ui, sans-serif", background: "#fff" }}
         >
+          <BallSheenDefs />
           <rect x="0" y="0" width={W} height={H} fill="#fff" />
 
           {/* Colour field inside the white court frame */}
@@ -118,7 +120,7 @@ export const Poster = memo(
           )}
 
           <g transform={`translate(${PAD_X + yearStripW}, 58)`}>
-            <text fontFamily="Montserrat" fontWeight="700" fontSize="11" fill={ink} opacity="0.85" style={{ letterSpacing: "0.32em" }}>
+            <text fontFamily="Montserrat" fontWeight="600" fontSize="11" fill={ink} opacity="0.85" style={{ letterSpacing: "0.32em" }}>
               OPEN ERA · {data[0].year}–{data[data.length - 1].year} · CHAMPIONS & FINAL SCORES
             </text>
           </g>
@@ -176,7 +178,7 @@ export const Poster = memo(
                 onMouseLeave={interactive ? () => setHover(null) : undefined}
                 style={interactive ? { cursor: "pointer" } : undefined}
               >
-                <FinalCircle row={row} idx={i} rows={data} radius={radius} tourn={tourn} indicator={indicator} showNat={showNat} showScore={showScore} natFill={natFill} />
+                <FinalCircle row={row} idx={i} rows={data} radius={radius} tourn={tourn} indicator={indicator} ballPlacement={ballPlacement} showNat={showNat} showScore={showScore} natFill={natFill} />
                 {isHovered && (
                   <circle r={radius + 4} fill="none" stroke={paperMode === "paper" ? tourn.bg : "#fff"} strokeOpacity="0.9" strokeWidth="2.5" />
                 )}
@@ -193,14 +195,14 @@ export const Poster = memo(
               <text
                 key={first.year}
                 x={PAD_X + yearStripW - 18}
-                y={gridTop + cellH * (rIdx + 0.5) + 6}
+                y={gridTop + cellH * (rIdx + 0.5) + 5}
                 textAnchor="end"
-                fontFamily="'Playfair Display', Georgia, serif"
-                fontWeight="700"
-                fontSize="17"
+                fontFamily="Montserrat"
+                fontWeight="600"
+                fontSize="15"
                 fill={ink}
-                style={{ letterSpacing: "0.02em" }}
-                opacity="0.95"
+                style={{ letterSpacing: "0.12em", fontVariantNumeric: "tabular-nums" }}
+                opacity="0.9"
               >
                 {first.year}
               </text>

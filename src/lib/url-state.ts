@@ -6,6 +6,7 @@ export const DEFAULT_TWEAKS: TweakState = {
   division: "men",
   paperMode: "block",
   indicator: "curl",
+  ballPlacement: "overlap",
   perRow: 6,
   showNat: true,
   showScore: true,
@@ -16,6 +17,7 @@ export const DEFAULT_VIZ: VizTab = "poster";
 const DIVISION_VALUES: readonly Division[] = ["men", "women"];
 const PAPER_VALUES: readonly TweakState["paperMode"][] = ["block", "paper"];
 const INDICATOR_VALUES: readonly TweakState["indicator"][] = ["curl", "badge", "ring", "none"];
+const BALL_VALUES: readonly TweakState["ballPlacement"][] = ["overlap", "float"];
 const PER_ROW_VALUES: readonly TweakState["perRow"][] = [4, 6, 10];
 const VIZ_VALUES: readonly VizTab[] = ["poster", "gallery", "era", "career", "fingerprint", "nations"];
 
@@ -30,6 +32,7 @@ export function encodeState(tweaks: TweakState, viz: VizTab): string {
     div: tweaks.division,
     paper: tweaks.paperMode,
     ind: tweaks.indicator,
+    balls: tweaks.ballPlacement,
     row: String(tweaks.perRow),
     nat: tweaks.showNat ? "1" : "0",
     score: tweaks.showScore ? "1" : "0",
@@ -47,6 +50,7 @@ export function decodeState(search: string): { tweaks: TweakState; viz: VizTab }
       division: pick(params.get("div"), DIVISION_VALUES, DEFAULT_TWEAKS.division),
       paperMode: pick(params.get("paper"), PAPER_VALUES, DEFAULT_TWEAKS.paperMode),
       indicator: pick(params.get("ind"), INDICATOR_VALUES, DEFAULT_TWEAKS.indicator),
+      ballPlacement: pick(params.get("balls"), BALL_VALUES, DEFAULT_TWEAKS.ballPlacement),
       perRow: PER_ROW_VALUES.includes(rowRaw as TweakState["perRow"])
         ? (rowRaw as TweakState["perRow"])
         : DEFAULT_TWEAKS.perRow,

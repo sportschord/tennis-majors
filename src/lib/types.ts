@@ -24,6 +24,8 @@ export interface TweakState {
   division: Division;
   paperMode: "block" | "paper";
   indicator: "curl" | "badge" | "ring" | "none";
+  /** Ball crown vs circle: bite into the edge, or float just off it. */
+  ballPlacement: "overlap" | "float";
   perRow: 4 | 6 | 10;
   showNat: boolean;
   showScore: boolean;

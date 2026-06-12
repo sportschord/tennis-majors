@@ -12,13 +12,14 @@ interface FinalCircleProps {
   radius: number;
   tourn: TournamentMeta;
   indicator: "curl" | "badge" | "ring" | "none";
+  ballPlacement: "overlap" | "float";
   showNat: boolean;
   showScore: boolean;
   /** Mode-aware nationality color — white on block, deep ink on paper. */
   natFill?: string;
 }
 
-export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, tourn, indicator, showNat, showScore, natFill = "rgba(255,255,255,0.92)" }: FinalCircleProps) {
+export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, tourn, indicator, ballPlacement, showNat, showScore, natFill = "rgba(255,255,255,0.92)" }: FinalCircleProps) {
   const priorCount = countPriorTitles(rows, idx);
   const isRepeat = priorCount > 0;
 
@@ -35,7 +36,9 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
   const vsY = -radius * 0.04;
   const ruY = radius * 0.16;
   const scY1 = radius * 0.42;
-  const scY2 = radius * 0.6;
+  // A real line height (1.3em), not a fixed radius fraction — the old 0.18R
+  // gap put wrapped score lines almost on top of each other.
+  const scY2 = scY1 + scSize * 1.3;
 
   const maxNameW = chordAt(nameY) - M * 2;
   const maxRuW = chordAt(ruY) - M * 2;
@@ -51,7 +54,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
 
   return (
     <g>
-      {indicator === "curl" && <BallCurl count={priorCount} radius={radius} color={tourn.ball} />}
+      {indicator === "curl" && <BallCurl count={priorCount} radius={radius} color={tourn.ball} placement={ballPlacement} />}
 
       <circle r={radius} fill="#fff" />
 
@@ -71,7 +74,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
         {row.w}
       </text>
 
-      <text textAnchor="middle" y={vsY + vsSize * 0.34} fontFamily="Montserrat" fontWeight="400" fontSize={vsSize} fill={tourn.bgDeep} opacity="0.55">
+      <text textAnchor="middle" y={vsY + vsSize * 0.34} fontFamily="Montserrat" fontWeight="500" fontSize={vsSize} fill={tourn.bgDeep} opacity="0.55">
         vs
       </text>
 
@@ -94,7 +97,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
           textAnchor="middle"
           y={(i === 0 ? scY1 : scY2) + scSize * 0.34}
           fontFamily="Montserrat"
-          fontWeight="600"
+          fontWeight="500"
           fontSize={scSize}
           fill={tourn.bgDeep}
           opacity="0.92"

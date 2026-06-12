@@ -23,8 +23,8 @@ export const NationStream = forwardRef<SVGSVGElement, Props>(function NationStre
       TENNIS_DATA[k][division].forEach((r) => all.push({ year: r.year, n: r.n }));
     });
 
-    const yearMin = 1968,
-      yearMax = 2025;
+    const yearMin = 1968;
+    const yearMax = Math.max(...all.map((r) => r.year));
     const yrs: number[] = [];
     for (let y = yearMin; y <= yearMax; y++) yrs.push(y);
 
@@ -119,9 +119,6 @@ export const NationStream = forwardRef<SVGSVGElement, Props>(function NationStre
           );
         })}
 
-      <text x={W - 40} y={H - 24} textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="11" fill="#3E4A5E" style={{ letterSpacing: "0.22em" }}>
-        SPORTSCHORD · DATA VISUALISATION DESIGN
-      </text>
     </svg>
   );
 });

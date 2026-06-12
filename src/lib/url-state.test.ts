@@ -9,6 +9,7 @@ describe("encodeState / decodeState", () => {
       division: "women",
       paperMode: "paper",
       indicator: "badge",
+      ballPlacement: "float",
       perRow: 10,
       showNat: false,
       showScore: false,
@@ -32,11 +33,12 @@ describe("encodeState / decodeState", () => {
   });
 
   it("falls back to defaults on invalid values", () => {
-    const decoded = decodeState("?viz=bogus&tourn=XX&div=mixed&paper=vellum&ind=sparkle&row=7&nat=yes&score=");
+    const decoded = decodeState("?viz=bogus&tourn=XX&div=mixed&paper=vellum&ind=sparkle&balls=hover&row=7&nat=yes&score=");
     expect(decoded.tweaks.tournament).toBe(DEFAULT_TWEAKS.tournament);
     expect(decoded.tweaks.division).toBe(DEFAULT_TWEAKS.division);
     expect(decoded.tweaks.paperMode).toBe(DEFAULT_TWEAKS.paperMode);
     expect(decoded.tweaks.indicator).toBe(DEFAULT_TWEAKS.indicator);
+    expect(decoded.tweaks.ballPlacement).toBe(DEFAULT_TWEAKS.ballPlacement);
     expect(decoded.tweaks.perRow).toBe(DEFAULT_TWEAKS.perRow);
     // Toggles only switch off on an explicit "0"
     expect(decoded.tweaks.showNat).toBe(true);

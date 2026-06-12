@@ -62,6 +62,7 @@ export default function PrintPage() {
           tournamentKey={tweaks.tournament}
           division={tweaks.division}
           indicator={tweaks.indicator}
+          ballPlacement={tweaks.ballPlacement}
           showNat={tweaks.showNat}
           showScore={tweaks.showScore}
           paperMode={tweaks.paperMode}

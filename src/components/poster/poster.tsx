@@ -5,13 +5,14 @@ import type { TournamentKey, Division } from "@/lib/types";
 import { TENNIS_DATA } from "@/lib/data";
 import { TOURNAMENTS, DIVISIONS } from "@/lib/tournaments";
 import { countPriorTitles } from "@/lib/utils";
-import { TennisBall } from "./indicators";
+import { BallSheenDefs, TennisBall } from "./indicators";
 import { FinalCircle } from "./final-circle";
 
 interface PosterProps {
   tournamentKey: TournamentKey;
   division: Division;
   indicator: "curl" | "badge" | "ring" | "none";
+  ballPlacement?: "overlap" | "float" | "trail";
   showNat: boolean;
   showScore: boolean;
   paperMode: "block" | "paper";
@@ -26,6 +27,14 @@ interface HoverState {
   y: number;
 }
 
+// Measured Playfair Display 700 advance widths at 84px + 0.02em tracking.
+const TITLE_NATURAL_W: Record<string, number> = {
+  "AUSTRALIAN OPEN CHAMPIONS": 1362,
+  "FRENCH OPEN CHAMPIONS": 1174,
+  "WIMBLEDON CHAMPIONS": 1113,
+  "US OPEN CHAMPIONS": 926,
+};
+
 function ordinal(n: number): string {
   if (n % 100 >= 11 && n % 100 <= 13) return `${n}TH`;
   const suffix = ["TH", "ST", "ND", "RD"][n % 10 <= 3 ? n % 10 : 0];
@@ -34,7 +43,7 @@ function ordinal(n: number): string {
 
 export const Poster = memo(
   forwardRef<SVGSVGElement, PosterProps>(function Poster(
-    { tournamentKey, division, indicator, showNat, showScore, paperMode, perRow, interactive = false },
+    { tournamentKey, division, indicator, ballPlacement = "overlap", showNat, showScore, paperMode, perRow, interactive = false },
     ref
   ) {
     const [hover, setHover] = useState<HoverState | null>(null);
@@ -48,28 +57,40 @@ export const Poster = memo(
     const PAD_X = 70;
     const PAD_TOP = 70;
 
+    // Court-as-frame: the white surround IS the court line. A solid margin
+    // wraps the colour field, and a same-width gap separates the footer band
+    // — boundary and baseline drawn in negative space, not stroked on top.
+    const FRAME = 28;
+    const footerTop = H - FRAME - FOOT_H;
+    const fieldBottom = footerTop - FRAME;
+
     const cols = perRow;
     const totalRows = Math.ceil(data.length / cols);
     const gridW = W - PAD_X * 2 - 60;
     const yearStripW = 60;
     const cellW = gridW / cols;
     const gridTop = PAD_TOP;
-    const gridBottom = H - FOOT_H - 40;
+    const gridBottom = fieldBottom - 34;
     const gridH = gridBottom - gridTop;
     const cellH = Math.min(gridH / totalRows, cellW * 1.05);
     const radius = Math.min(cellW, cellH) * 0.38;
 
     const bg = paperMode === "paper" ? "#FBFAF6" : tourn.bg;
     const ink = paperMode === "paper" ? tourn.bgDeep : "#fff";
+    const natFill = paperMode === "paper" ? tourn.bgDeep : "rgba(255,255,255,0.92)";
 
     const hoveredRow = hover ? data[hover.idx] : null;
     const hoveredPrior = hover ? countPriorTitles(data, hover.idx) : 0;
 
-    // ~0.72em average advance for Montserrat 800 + 0.06em tracking; clamp
-    // long titles (Australian Open) inside the inner border via textLength.
+    // Fit-to-width beats textLength compression (squeezed glyphs distort the
+    // serif): long titles scale down to TITLE_W, short ones letter-space out
+    // to it, so all four posters carry an identical title width with even
+    // margins. Widths measured via getComputedTextLength at 84px Playfair
+    // Display 700 with 0.02em tracking (self-hosted font, metrics stable).
+    const TITLE_W = 1000;
     const footerTitle = `${tourn.name.toUpperCase()} CHAMPIONS`;
-    const footerTitleMaxW = W - 120;
-    const footerTitleClamped = footerTitle.length * 78 * 0.72 > footerTitleMaxW;
+    const titleNaturalW = TITLE_NATURAL_W[footerTitle] ?? footerTitle.length * 84 * 0.7;
+    const footerTitleSize = Math.min(84, (84 * TITLE_W) / titleNaturalW);
 
     return (
       <div className="relative w-full">
@@ -78,40 +99,48 @@ export const Poster = memo(
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
           height="100%"
-          style={{ display: "block", fontFamily: "Montserrat, system-ui, sans-serif", background: bg }}
+          style={{ display: "block", fontFamily: "Montserrat, system-ui, sans-serif", background: "#fff" }}
         >
-          <rect x="0" y="0" width={W} height={H} fill={bg} />
+          <BallSheenDefs />
+          <rect x="0" y="0" width={W} height={H} fill="#fff" />
 
-          <rect
-            x="22"
-            y="22"
-            width={W - 44}
-            height={H - 44}
-            fill="none"
-            stroke={paperMode === "paper" ? tourn.bg : "rgba(255,255,255,0.18)"}
-            strokeWidth="2"
-          />
+          {/* Colour field inside the white court frame */}
+          <rect x={FRAME} y={FRAME} width={W - FRAME * 2} height={fieldBottom - FRAME} fill={bg} />
+          {paperMode === "paper" && (
+            <rect
+              x={FRAME}
+              y={FRAME}
+              width={W - FRAME * 2}
+              height={fieldBottom - FRAME}
+              fill="none"
+              stroke={tourn.bg}
+              strokeOpacity="0.5"
+              strokeWidth="2"
+            />
+          )}
 
-          <g transform={`translate(${PAD_X + yearStripW}, 44)`}>
-            <text fontFamily="Montserrat" fontWeight="700" fontSize="11" fill={ink} opacity="0.85" style={{ letterSpacing: "0.32em" }}>
+          <g transform={`translate(${PAD_X + yearStripW}, 58)`}>
+            <text fontFamily="Montserrat" fontWeight="600" fontSize="11" fill={ink} opacity="0.85" style={{ letterSpacing: "0.32em" }}>
               OPEN ERA · {data[0].year}–{data[data.length - 1].year} · CHAMPIONS & FINAL SCORES
             </text>
           </g>
 
-          <g transform={`translate(${W - PAD_X}, 50)`}>
+          {/* Legend shares the header's baseline (58); the ball icon is
+              optically centred on the cap height of the 10px text. */}
+          <g transform={`translate(${W - PAD_X}, 58)`}>
             {indicator === "curl" && (
               <g>
-                <g transform="translate(-32,0)">
+                <g transform="translate(-34,-10)">
                   <TennisBall size={14} color={tourn.ball} />
                 </g>
-                <text x="-44" y="3" textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
+                <text x="-44" textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
                   EACH BALL · A PRIOR TITLE
                 </text>
               </g>
             )}
             {indicator === "badge" && (
               <text textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
-                ×N BADGE · TOTAL TITLES TO DATE
+                NUMBERED BALL · TOTAL TITLES TO DATE
               </text>
             )}
             {indicator === "ring" && (
@@ -125,8 +154,6 @@ export const Poster = memo(
               </text>
             )}
           </g>
-
-          <line x1={PAD_X + yearStripW} y1="60" x2={W - PAD_X} y2="60" stroke={ink} strokeOpacity="0.35" strokeWidth="0.75" />
 
           {data.map((row, i) => {
             const cIdx = i % cols;
@@ -151,39 +178,53 @@ export const Poster = memo(
                 onMouseLeave={interactive ? () => setHover(null) : undefined}
                 style={interactive ? { cursor: "pointer" } : undefined}
               >
-                <FinalCircle row={row} idx={i} rows={data} radius={radius} tourn={tourn} indicator={indicator} showNat={showNat} showScore={showScore} />
+                <FinalCircle row={row} idx={i} rows={data} radius={radius} tourn={tourn} indicator={indicator} ballPlacement={ballPlacement} showNat={showNat} showScore={showScore} natFill={natFill} />
                 {isHovered && (
                   <circle r={radius + 4} fill="none" stroke={paperMode === "paper" ? tourn.bg : "#fff"} strokeOpacity="0.9" strokeWidth="2.5" />
-                )}
-                {cIdx === 0 && (
-                  <g transform={`translate(${-radius - 36}, 6)`}>
-                    <text fontFamily="Montserrat" fontWeight="800" fontSize="14" fill={ink} style={{ letterSpacing: "0.06em" }} opacity="0.95">
-                      {row.year}
-                    </text>
-                  </g>
                 )}
               </g>
             );
           })}
 
-          <rect x="0" y={H - FOOT_H} width={W} height={FOOT_H} fill={tourn.bgDeep} />
-          <g transform={`translate(${W / 2}, ${H - FOOT_H + 88})`}>
+          {/* Year markers: a fixed right-aligned column between the frame
+              and the circles, vertically centred on each row. */}
+          {Array.from({ length: totalRows }, (_, rIdx) => {
+            const first = data[rIdx * cols];
+            if (!first) return null;
+            return (
+              <text
+                key={first.year}
+                x={PAD_X + yearStripW - 18}
+                y={gridTop + cellH * (rIdx + 0.5) + 5}
+                textAnchor="end"
+                fontFamily="Montserrat"
+                fontWeight="600"
+                fontSize="15"
+                fill={ink}
+                style={{ letterSpacing: "0.12em", fontVariantNumeric: "tabular-nums" }}
+                opacity="0.9"
+              >
+                {first.year}
+              </text>
+            );
+          })}
+
+          <rect x={FRAME} y={footerTop} width={W - FRAME * 2} height={FOOT_H} fill={tourn.bgDeep} />
+          <g transform={`translate(${W / 2}, ${footerTop + 118})`}>
             <text
               textAnchor="middle"
-              fontFamily="Montserrat"
-              fontWeight="800"
-              fontSize="78"
+              fontFamily="'Playfair Display', Georgia, serif"
+              fontWeight="700"
+              fontSize={footerTitleSize}
               fill="#fff"
-              style={{ letterSpacing: "0.06em" }}
-              {...(footerTitleClamped ? { textLength: footerTitleMaxW, lengthAdjust: "spacingAndGlyphs" as const } : {})}
+              style={{ letterSpacing: "0.02em" }}
+              textLength={TITLE_W}
+              lengthAdjust="spacing"
             >
               {footerTitle}
             </text>
-            <text textAnchor="middle" y="56" fontFamily="Montserrat" fontWeight="600" fontSize="26" fill="rgba(255,255,255,0.92)" style={{ letterSpacing: "0.22em" }}>
+            <text textAnchor="middle" y="58" fontFamily="Montserrat" fontWeight="500" fontSize="23" fill="rgba(255,255,255,0.9)" style={{ letterSpacing: "0.3em" }}>
               {tourn.venue.toUpperCase()} · {DIVISIONS[division].label.toUpperCase()}
-            </text>
-            <text textAnchor="middle" y="98" fontFamily="Montserrat" fontWeight="600" fontSize="12" fill="rgba(255,255,255,0.65)" style={{ letterSpacing: "0.32em" }}>
-              SPORTSCHORD · DATA VISUALISATION DESIGN
             </text>
           </g>
         </svg>

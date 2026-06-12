@@ -66,6 +66,7 @@ const AO_M: Final[] = [
   r(2023, "N Djokovic", "S Tsitsipas", "6-3 7-6 7-6", "SRB"),
   r(2024, "J Sinner", "D Medvedev", "3-6 3-6 6-4 6-4 6-3", "ITA"),
   r(2025, "J Sinner", "A Zverev", "6-3 7-6 6-3", "ITA"),
+  r(2026, "C Alcaraz", "N Djokovic", "2-6 6-2 6-3 7-5", "ESP"),
 ];
 
 const AO_W: Final[] = [
@@ -127,6 +128,7 @@ const AO_W: Final[] = [
   r(2023, "A Sabalenka", "E Rybakina", "4-6 6-3 6-4", "BLR"),
   r(2024, "A Sabalenka", "Z Zheng", "6-3 6-2", "BLR"),
   r(2025, "M Keys", "A Sabalenka", "6-3 2-6 7-5", "USA"),
+  r(2026, "E Rybakina", "A Sabalenka", "6-4 4-6 6-4", "KAZ"),
 ];
 
 const RG_M: Final[] = [
@@ -188,6 +190,7 @@ const RG_M: Final[] = [
   r(2023, "N Djokovic", "C Ruud", "7-6 6-3 7-5", "SRB"),
   r(2024, "C Alcaraz", "A Zverev", "6-3 2-6 5-7 6-1 6-2", "ESP"),
   r(2025, "C Alcaraz", "J Sinner", "4-6 6-7 6-4 7-6 7-6", "ESP"),
+  r(2026, "A Zverev", "F Cobolli", "6-1 4-6 6-4 6-7 6-1", "GER"),
 ];
 
 const RG_W: Final[] = [
@@ -249,6 +252,7 @@ const RG_W: Final[] = [
   r(2023, "I Swiatek", "K Muchova", "6-2 5-7 6-4", "POL"),
   r(2024, "I Swiatek", "J Paolini", "6-2 6-1", "POL"),
   r(2025, "C Gauff", "A Sabalenka", "6-7 6-2 6-4", "USA"),
+  r(2026, "M Andreeva", "M Chwalinska", "6-3 6-2", "RUS"),
 ];
 
 const WB_M: Final[] = [

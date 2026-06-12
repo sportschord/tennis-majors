@@ -42,6 +42,7 @@ export function Gallery({ tweaks, onSelect }: GalleryProps) {
                     tournamentKey={key}
                     division={division}
                     indicator={tweaks.indicator}
+                    ballPlacement={tweaks.ballPlacement}
                     showNat={tweaks.showNat}
                     showScore={tweaks.showScore}
                     paperMode={tweaks.paperMode}

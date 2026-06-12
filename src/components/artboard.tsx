@@ -30,6 +30,10 @@ export function Artboard({ width, height, artworkKey, children }: ArtboardProps)
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Measure synchronously on mount: ResizeObserver callbacks ride on
+    // rendering frames, which throttled/headless tabs may not produce —
+    // without this the artboard stays blank until the first real frame.
+    setViewport({ w: el.clientWidth, h: el.clientHeight });
     const ro = new ResizeObserver(([entry]) => {
       setViewport({ w: entry.contentRect.width, h: entry.contentRect.height });
     });

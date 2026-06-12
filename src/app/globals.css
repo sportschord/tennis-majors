@@ -12,6 +12,15 @@
   src: url("/fonts/montserrat-var.woff2") format("woff2");
 }
 
+/* Editorial serif for poster titles & year labels (sportschord design language). */
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/playfair-var.woff2") format("woff2");
+}
+
 @theme {
   --color-background: #0e1a2b;
   --color-panel: #13233b;

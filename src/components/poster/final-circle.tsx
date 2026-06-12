@@ -107,7 +107,7 @@ export const FinalCircle = memo(function FinalCircle({ row, idx, rows, radius, t
       {showNat && (
         <text
           textAnchor="middle"
-          y={radius + natSize * 1.7}
+          y={radius + natSize * 1.5}
           fontFamily="Montserrat"
           fontWeight="600"
           fontSize={natSize}

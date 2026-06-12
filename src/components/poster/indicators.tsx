@@ -12,7 +12,9 @@ export function TennisBall({ size = 18, color = "#D6DD30" }: { size?: number; co
 
 export function BallCurl({ count, radius, color }: { count: number; radius: number; color: string }) {
   if (count <= 0) return null;
-  const r = radius + 8;
+  // Hug the circle (a crown resting on the head): tight orbit + smaller balls
+  // keep the crown clear of the nationality code in the row above.
+  const r = radius + 5;
   // Curl UP the right shoulder and over the top (negative = counter-clockwise
   // in SVG): the zone below the circle belongs to the nationality code.
   const startDeg = -12;
@@ -25,9 +27,9 @@ export function BallCurl({ count, radius, color }: { count: number; radius: numb
         const y = Math.sin(a) * r;
         return (
           <g key={i} transform={`translate(${x},${y})`}>
-            <circle r="6.5" fill={color} />
-            <path d="M-6 -2 Q0 1.5 6 -2" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="0.9" strokeLinecap="round" />
-            <path d="M-6 2 Q0 -1.5 6 2" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="0.9" strokeLinecap="round" />
+            <circle r="5.8" fill={color} />
+            <path d="M-5.3 -1.8 Q0 1.3 5.3 -1.8" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="0.85" strokeLinecap="round" />
+            <path d="M-5.3 1.8 Q0 -1.3 5.3 1.8" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="0.85" strokeLinecap="round" />
           </g>
         );
       })}

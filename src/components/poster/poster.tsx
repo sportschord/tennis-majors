@@ -26,6 +26,14 @@ interface HoverState {
   y: number;
 }
 
+// Measured Playfair Display 700 advance widths at 84px + 0.02em tracking.
+const TITLE_NATURAL_W: Record<string, number> = {
+  "AUSTRALIAN OPEN CHAMPIONS": 1362,
+  "FRENCH OPEN CHAMPIONS": 1174,
+  "WIMBLEDON CHAMPIONS": 1113,
+  "US OPEN CHAMPIONS": 926,
+};
+
 function ordinal(n: number): string {
   if (n % 100 >= 11 && n % 100 <= 13) return `${n}TH`;
   const suffix = ["TH", "ST", "ND", "RD"][n % 10 <= 3 ? n % 10 : 0];
@@ -73,11 +81,15 @@ export const Poster = memo(
     const hoveredRow = hover ? data[hover.idx] : null;
     const hoveredPrior = hover ? countPriorTitles(data, hover.idx) : 0;
 
-    // ~0.66em average caps advance for Playfair Display 700 + 0.02em
-    // tracking; clamp long titles (Australian Open) inside the frame.
+    // Fit-to-width beats textLength compression (squeezed glyphs distort the
+    // serif): long titles scale down to TITLE_W, short ones letter-space out
+    // to it, so all four posters carry an identical title width with even
+    // margins. Widths measured via getComputedTextLength at 84px Playfair
+    // Display 700 with 0.02em tracking (self-hosted font, metrics stable).
+    const TITLE_W = 1000;
     const footerTitle = `${tourn.name.toUpperCase()} CHAMPIONS`;
-    const footerTitleMaxW = W - 120;
-    const footerTitleClamped = footerTitle.length * 84 * 0.66 > footerTitleMaxW;
+    const titleNaturalW = TITLE_NATURAL_W[footerTitle] ?? footerTitle.length * 84 * 0.7;
+    const footerTitleSize = Math.min(84, (84 * TITLE_W) / titleNaturalW);
 
     return (
       <div className="relative w-full">
@@ -111,13 +123,15 @@ export const Poster = memo(
             </text>
           </g>
 
-          <g transform={`translate(${W - PAD_X}, 55)`}>
+          {/* Legend shares the header's baseline (58); the ball icon is
+              optically centred on the cap height of the 10px text. */}
+          <g transform={`translate(${W - PAD_X}, 58)`}>
             {indicator === "curl" && (
               <g>
-                <g transform="translate(-32,0)">
+                <g transform="translate(-34,-10)">
                   <TennisBall size={14} color={tourn.ball} />
                 </g>
-                <text x="-44" y="3" textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
+                <text x="-44" textAnchor="end" fontFamily="Montserrat" fontWeight="600" fontSize="10" fill={ink} style={{ letterSpacing: "0.18em" }} opacity="0.95">
                   EACH BALL · A PRIOR TITLE
                 </text>
               </g>
@@ -199,10 +213,11 @@ export const Poster = memo(
               textAnchor="middle"
               fontFamily="'Playfair Display', Georgia, serif"
               fontWeight="700"
-              fontSize="84"
+              fontSize={footerTitleSize}
               fill="#fff"
               style={{ letterSpacing: "0.02em" }}
-              {...(footerTitleClamped ? { textLength: footerTitleMaxW, lengthAdjust: "spacingAndGlyphs" as const } : {})}
+              textLength={TITLE_W}
+              lengthAdjust="spacing"
             >
               {footerTitle}
             </text>

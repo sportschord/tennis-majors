@@ -81,7 +81,11 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
     space: { width: W, height: H },
     placement: { x: 0, y: 0, width: 1, height: 1 },
     styling: { background: tourn.bg, palette: [tourn.bgDeep, tourn.ball, tourn.accent], fontFamily: "Montserrat" },
-    regions: { footer: { x: 0, y: footerTop / H, width: 1, height: FOOT_H / H } },
+    // Footer band = the PRINTED dark band (inset FRAME on the sides, like poster.tsx
+    // `x=FRAME width=W-2*FRAME`), NOT full width — so the white outer frame runs
+    // continuously down BOTH sides through the footer instead of being painted over
+    // (which made the frame look broken / flicker at the footer).
+    regions: { footer: { x: FRAME / W, y: footerTop / H, width: (W - 2 * FRAME) / W, height: FOOT_H / H } },
     cells,
     cellOverscan: 1.06,
     // Court-frame: the white margin (width FRAME) is the poster's OUTER border,

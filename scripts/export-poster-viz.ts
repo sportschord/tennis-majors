@@ -53,9 +53,10 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
   const titleBaseline = footerTop + 118;
   // header left run (matches poster.tsx line ~126), at ~10.2 viz px/char.
   const headerText = `OPEN ERA · ${data[0].year}–${data[data.length - 1].year} · CHAMPIONS & FINAL SCORES`;
-  // prior-title balls (indicator "curl", placement "overlap" — the crown).
-  const ballR = 5.8;
-  const orbit = radius + 1.5;
+  // prior-title balls (indicator "curl", placement "float" — the app default: the
+  // balls hover just OFF the circle's edge with a sliver of field, not biting it).
+  const ballR = 5.4;
+  const orbit = radius + 8;
   // --------------------------------
 
   const cells: Array<{ cx: number; cy: number; r: number }> = [];
@@ -83,9 +84,11 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
     regions: { footer: { x: 0, y: footerTop / H, width: 1, height: FOOT_H / H } },
     cells,
     cellOverscan: 1.06,
-    // Court-frame: the white margin (width FRAME) wraps the colour field; trace
-    // its centreline so the printed tramline reveals cleanly all the way round.
-    frame: { x: round(FRAME / 2), y: round(FRAME / 2), width: round(W - FRAME), height: round(fieldBottom), strokeWidth: FRAME },
+    // Court-frame: the white margin (width FRAME) is the poster's OUTER border,
+    // wrapping BOTH the colour field and the footer band as one enclosing frame
+    // (height = H − FRAME, not just the field) so the tramline reads as a single
+    // rectangle rather than two stacked boxes. Trace its centreline.
+    frame: { x: round(FRAME / 2), y: round(FRAME / 2), width: round(W - FRAME), height: round(H - FRAME), strokeWidth: FRAME },
     // Top-left header run — tight box + char count so it can TYPE out (legend at
     // far right is left to the full-print fade).
     header: { x: PAD_X + yearStripW, y: 44, width: Math.round(headerText.length * 10.2), height: 22, steps: headerText.length },

@@ -46,6 +46,10 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
   const cellH = Math.min(gridH / totalRows, cellW * 1.05);
   const radius = Math.min(cellW, cellH) * 0.38;
   // header text baseline is 58; left run starts at PAD_X + yearStripW.
+  // footer title: centred at (W/2, footerTop+118), forced to textLength = 1000.
+  const TITLE_W = 1000;
+  const footerTitleText = `${tourn.name.toUpperCase()} CHAMPIONS`;
+  const titleBaseline = footerTop + 118;
   // --------------------------------
 
   const cells = data.map((_row, i) => ({
@@ -70,6 +74,8 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
     frame: { x: round(FRAME / 2), y: round(FRAME / 2), width: round(W - FRAME), height: round(fieldBottom), strokeWidth: FRAME },
     // Top header strip ("OPEN ERA · … · CHAMPIONS & FINAL SCORES" + legend).
     header: { x: PAD_X + yearStripW, y: 44, width: W - PAD_X * 2 - yearStripW, height: 22 },
+    // Footer title box (typed char-by-char). steps = character count of the title.
+    footerTitle: { x: (W - TITLE_W) / 2, y: Math.round(titleBaseline - 78), width: TITLE_W, height: 100, steps: footerTitleText.length },
   };
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import type { TournamentKey, Division, TweakState } from "@/lib/types";
 import { isAuthorizedPrintRequest, UNAUTHORIZED_PRINT_BODY } from "@/lib/print/auth";
-import { buildDesignFolderName, type PrintRenderOptions, type PrintFormat } from "@/lib/print/options";
+import { buildDesignFolderName, type PrintRenderOptions, type PrintSize } from "@/lib/print/options";
 import { launchBrowser, renderPrintOnPage, getBaseUrl } from "@/lib/print/render.server";
 import { uploadPrintToDrive, type DriveUploadResult } from "@/lib/print/drive.server";
 import {
@@ -28,8 +28,8 @@ interface BatchCombination {
 interface BatchBody {
   combinations?: BatchCombination[];
   settings?: Partial<TweakState>;
-  /** Formats uploaded per design — default both masters. */
-  formats?: PrintFormat[];
+  /** Size groups uploaded per design — default both PNG masters. */
+  sizes?: PrintSize[];
 }
 
 function logBatch(level: "info" | "error", payload: Record<string, unknown>): void {
@@ -41,8 +41,8 @@ function logBatch(level: "info" | "error", payload: Record<string, unknown>): vo
  * POST /api/generate-print/batch — SSE stream of per-file progress.
  * Renders serially in ONE browser session (ported from f1app's batch
  * route) to avoid spawning parallel Chromium instances on Vercel.
- * Each combination uploads its formats (A.pdf master + A.png) into the
- * prodigi intake tree.
+ * Each combination uploads its PNG masters (A.png at ISO √2 + 18x24.png
+ * at 3:4) into the prodigi intake tree.
  */
 export async function POST(request: NextRequest): Promise<Response> {
   if (!isAuthorizedPrintRequest(request)) {
@@ -61,10 +61,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 
   const combinations = Array.isArray(body.combinations) ? body.combinations : [];
-  const formats: PrintFormat[] =
-    Array.isArray(body.formats) && body.formats.length
-      ? body.formats.filter((f): f is PrintFormat => f === "pdf" || f === "png")
-      : ["pdf", "png"];
+  const sizes: PrintSize[] =
+    Array.isArray(body.sizes) && body.sizes.length
+      ? body.sizes.filter((s): s is PrintSize => s === "A" || s === "18x24")
+      : ["A", "18x24"];
 
   if (combinations.length > MAX_BATCH_COMBINATIONS) {
     return new Response(
@@ -92,8 +92,8 @@ export async function POST(request: NextRequest): Promise<Response> {
         }
       }
 
-      send({ type: "start", total: combinations.length * formats.length });
-      logBatch("info", { msg: "batch_start", batchSize: combinations.length, formats });
+      send({ type: "start", total: combinations.length * sizes.length });
+      logBatch("info", { msg: "batch_start", batchSize: combinations.length, sizes });
 
       if (combinations.length === 0) {
         send({ type: "complete" });
@@ -117,29 +117,31 @@ export async function POST(request: NextRequest): Promise<Response> {
           const designName = buildDesignFolderName({
             viz: "poster",
             tweaks,
-            format: "pdf",
+            format: "png",
             dpi: 300,
+            size: "A",
             uploadTarget: "drive",
           });
 
-          for (const format of formats) {
+          for (const size of sizes) {
             const itemStartedAt = Date.now();
             const options: PrintRenderOptions = {
               viz: "poster",
               tweaks,
-              format,
+              format: "png",
               dpi: 300,
+              size,
               uploadTarget: "drive",
             };
-            const key = `${combo.clientKey || `${combo.tournament}-${combo.division}`}-${format}`;
-            const label = `${designName} · A.${format}`;
+            const key = `${combo.clientKey || `${combo.tournament}-${combo.division}`}-${size}`;
+            const label = `${designName} · ${size}.png`;
 
             send({ type: "item", key, fileName: label, status: "active" });
 
             try {
               const rendered = await renderPrintOnPage(page, baseUrl, options);
               const driveFile: DriveUploadResult = await uploadPrintToDrive(rendered);
-              uploadedAssets.push(buildIntakeAsset(designName, `A.${format}`, driveFile.id));
+              uploadedAssets.push(buildIntakeAsset(designName, `${size}.png`, driveFile.id));
               lastDestination = {
                 folderId: driveFile.folderId,
                 folderPath: driveFile.folderPath,
@@ -159,14 +161,14 @@ export async function POST(request: NextRequest): Promise<Response> {
               logBatch("info", {
                 msg: "item_done",
                 designName,
-                format,
+                size,
                 overwritten: driveFile.overwritten,
                 ms: Date.now() - itemStartedAt,
               });
             } catch (err) {
               const message = err instanceof Error ? err.message : "Unknown error";
               send({ type: "item", key, fileName: label, status: "error", error: message });
-              logBatch("error", { msg: "item_fail", designName, format, error: message });
+              logBatch("error", { msg: "item_fail", designName, size, error: message });
             }
           }
         }

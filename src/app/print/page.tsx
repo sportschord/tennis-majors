@@ -22,17 +22,21 @@ export default function PrintPage() {
     tweaks: TweakState;
     viz: Exclude<VizTab, "gallery">;
     width: number | null;
+    size18: boolean;
   } | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
 
   useEffect(() => {
     const { tweaks, viz } = decodeState(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     // Optional ?w= overrides the render width in CSS px — used by the PDF
     // path to lay the artwork out at exact page size (594mm ≈ 2245px).
-    const wRaw = parseInt(new URLSearchParams(window.location.search).get("w") ?? "", 10);
+    const wRaw = parseInt(params.get("w") ?? "", 10);
     const width = Number.isFinite(wRaw) ? Math.min(Math.max(wRaw, 100), 8000) : null;
+    // ?size=18x24 lays the poster out natively at 3:4 for the US-size master.
+    const size18 = params.get("size") === "18x24";
     // The gallery is a browsing view, not a print artifact.
-    setState({ tweaks, viz: viz === "gallery" ? "poster" : viz, width });
+    setState({ tweaks, viz: viz === "gallery" ? "poster" : viz, width, size18 });
     let cancelled = false;
     document.fonts.ready.then(() => {
       if (!cancelled) setFontsReady(true);
@@ -44,8 +48,8 @@ export default function PrintPage() {
 
   if (!state) return null;
 
-  const { tweaks, viz, width } = state;
-  const base = VIZ_DIMS[viz];
+  const { tweaks, viz, width, size18 } = state;
+  const base = viz === "poster" && size18 ? { w: 1188, h: 1584 } : VIZ_DIMS[viz];
   const dims = width ? { w: width, h: Math.round((width * base.h) / base.w) } : base;
 
   return (
@@ -63,6 +67,7 @@ export default function PrintPage() {
           division={tweaks.division}
           indicator={tweaks.indicator}
           ballPlacement={tweaks.ballPlacement}
+          aspect={size18 ? "18x24" : "a"}
           showNat={tweaks.showNat}
           showScore={tweaks.showScore}
           paperMode={tweaks.paperMode}

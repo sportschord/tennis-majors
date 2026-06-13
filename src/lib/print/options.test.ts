@@ -19,12 +19,18 @@ describe("parsePrintOptions", () => {
     expect(opts.uploadTarget).toBe("drive");
   });
 
-  it("coerces gallery to poster and defaults format/dpi", () => {
+  it("coerces gallery to poster and defaults format/dpi/size", () => {
     const opts = parsePrintOptions(new URLSearchParams("viz=gallery"));
     expect(opts.viz).toBe("poster");
     expect(opts.format).toBe("png");
     expect(opts.dpi).toBe(300);
+    expect(opts.size).toBe("A");
     expect(opts.uploadTarget).toBeNull();
+  });
+
+  it("parses the 18x24 size group", () => {
+    const opts = parsePrintOptions(new URLSearchParams("viz=poster&tourn=RG&div=men&size=18x24"));
+    expect(opts.size).toBe("18x24");
   });
 });
 
@@ -46,6 +52,20 @@ describe("naming", () => {
 });
 
 describe("getPrintGeometry", () => {
+  it("renders 18x24 PNG masters at exactly 5400x7200 (300 DPI)", () => {
+    const opts = parsePrintOptions(new URLSearchParams("viz=poster&tourn=RG&div=men&format=png&dpi=300&size=18x24"));
+    const g = getPrintGeometry(opts);
+    expect(g.cssWidth * g.deviceScaleFactor).toBe(5400);
+    expect(g.cssHeight * g.deviceScaleFactor).toBe(7200);
+  });
+
+  it("routes 18x24 renders through /print?size=18x24 with a width override", () => {
+    const opts = parsePrintOptions(new URLSearchParams("viz=poster&tourn=US&div=men&format=png&dpi=300&size=18x24"));
+    const params = new URLSearchParams(buildPrintPagePath(opts).split("?")[1]);
+    expect(params.get("size")).toBe("18x24");
+    expect(params.get("w")).toBe("1080");
+  });
+
   it("clears A1 at 300 DPI for poster PNG (needs 7016x9933)", () => {
     const opts = parsePrintOptions(new URLSearchParams("viz=poster&tourn=RG&div=men&format=png&dpi=300"));
     const g = getPrintGeometry(opts);

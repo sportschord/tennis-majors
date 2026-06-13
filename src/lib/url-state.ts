@@ -6,7 +6,7 @@ export const DEFAULT_TWEAKS: TweakState = {
   division: "men",
   paperMode: "block",
   indicator: "curl",
-  ballPlacement: "overlap",
+  ballPlacement: "float",
   perRow: 6,
   showNat: true,
   showScore: true,

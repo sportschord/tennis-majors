@@ -5,6 +5,15 @@ import {
   getPrintGeometry,
   type PrintRenderOptions,
 } from "./options";
+import { stitchPngsVertically } from "./png-stitch";
+
+/**
+ * Production Chromium (@sparticuz/chromium → SwiftShader) caps raster
+ * surfaces at 8192 device px; capturing past that WRAPS the content (the
+ * artwork's top repeats over its footer). Anything taller is captured in
+ * viewport-sized slices and stitched.
+ */
+const MAX_CAPTURE_DEVICE_PX = 8000;
 
 /**
  * Headless render engine, ported from f1app's lib/print-generator.server.js:
@@ -40,7 +49,7 @@ export async function launchBrowser(): Promise<Browser> {
   // large high-DPI surfaces, verified locally on macOS.
   return puppeteer.launch({
     headless: "shell",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--hide-scrollbars"],
   });
 }
 
@@ -103,11 +112,37 @@ export async function renderPrintOnPage(
       preferCSSPageSize: false,
     });
     contentType = "application/pdf";
-  } else {
+  } else if (geometry.cssHeight * geometry.deviceScaleFactor <= MAX_CAPTURE_DEVICE_PX) {
     // Viewport screenshot, not element.screenshot(): #print-page is laid out
     // at (0,0) exactly viewport-sized, and the element path's
     // scroll-into-view/visibility wait can stall in throttled headless pages.
     output = (await page.screenshot({ type: "png", omitBackground: false })) as Buffer;
+    contentType = "image/png";
+  } else {
+    // Sliced capture: shrink the viewport so each capture stays under the
+    // renderer's surface cap, scroll through the artwork, stitch. The last
+    // slice's scrollTo lands exactly at cssHeight - sliceHeight, so slices
+    // tile the artwork with no gap or overlap.
+    const sliceCssHeight = Math.floor(MAX_CAPTURE_DEVICE_PX / geometry.deviceScaleFactor);
+    const slices: Buffer[] = [];
+    for (let cssY = 0; cssY < geometry.cssHeight; cssY += sliceCssHeight) {
+      const height = Math.min(sliceCssHeight, geometry.cssHeight - cssY);
+      await page.setViewport({
+        width: geometry.cssWidth,
+        height,
+        deviceScaleFactor: geometry.deviceScaleFactor,
+      });
+      await page.evaluate((y: number) => window.scrollTo(0, y), cssY);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      slices.push(
+        (await page.screenshot({
+          type: "png",
+          omitBackground: false,
+          captureBeyondViewport: false,
+        })) as Buffer
+      );
+    }
+    output = stitchPngsVertically(slices);
     contentType = "image/png";
   }
 

@@ -9,7 +9,7 @@ describe("encodeState / decodeState", () => {
       division: "women",
       paperMode: "paper",
       indicator: "badge",
-      ballPlacement: "float",
+      ballPlacement: "overlap",
       perRow: 10,
       showNat: false,
       showScore: false,

@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { google, type drive_v3 } from "googleapis";
-import { buildDesignFolderName, SECTION_FOLDER, type PrintRenderOptions } from "./options";
+import { buildDesignFolderName, masterFileName, SECTION_FOLDER, type PrintRenderOptions } from "./options";
 import type { RenderedPrint } from "./render.server";
 
 /**
@@ -147,7 +147,7 @@ export async function uploadPrintToDrive(rendered: RenderedPrint): Promise<Drive
     parentId = await ensureDriveFolder(drive, folderName, parentId);
   }
 
-  const fileName = `A.${options.format}`;
+  const fileName = masterFileName(options);
   const escapedFileName = fileName.replace(/'/g, "\\'");
   const existing = await drive.files.list({
     q: `name = '${escapedFileName}' and '${parentId}' in parents and trashed = false`,

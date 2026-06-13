@@ -17,6 +17,8 @@ interface PosterProps {
   showScore: boolean;
   paperMode: "block" | "paper";
   perRow: number;
+  /** Page aspect: "a" = ISO √2 (1188×1684), "18x24" = 3:4 (1188×1584). */
+  aspect?: "a" | "18x24";
   /** Enables hover tooltips — off for gallery thumbnails and print capture. */
   interactive?: boolean;
 }
@@ -43,7 +45,7 @@ function ordinal(n: number): string {
 
 export const Poster = memo(
   forwardRef<SVGSVGElement, PosterProps>(function Poster(
-    { tournamentKey, division, indicator, ballPlacement = "overlap", showNat, showScore, paperMode, perRow, interactive = false },
+    { tournamentKey, division, indicator, ballPlacement = "overlap", showNat, showScore, paperMode, perRow, aspect = "a", interactive = false },
     ref
   ) {
     const [hover, setHover] = useState<HoverState | null>(null);
@@ -52,7 +54,7 @@ export const Poster = memo(
     const data = TENNIS_DATA[tournamentKey][division];
 
     const W = 1188,
-      H = 1684;
+      H = aspect === "18x24" ? 1584 : 1684;
     const FOOT_H = 230;
     const PAD_X = 70;
     const PAD_TOP = 70;

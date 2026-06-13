@@ -77,13 +77,13 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
   );
 
   const serverExport = useCallback(
-    async (format: "png" | "pdf") => {
+    async (size: "A" | "18x24") => {
       if (busy) return;
       setOpen(false);
       setBusy(true);
       try {
         const params = encodeState(tweaks, viz === "gallery" ? "poster" : (viz as never));
-        const res = await fetch(`/api/generate-print?${params}&format=${format}&dpi=300`);
+        const res = await fetch(`/api/generate-print?${params}&format=png&dpi=300&size=${size}`);
         if (res.status === 401) {
           throw new Error("Unauthorized — open /api/print-auth?token=… once in this browser.");
         }
@@ -94,7 +94,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
         const blob = await res.blob();
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] || `${filename}.${format}`;
+        a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] || `${filename}-${size}.png`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         setFeedback({ kind: "ok", message: `Saved ${a.download}` });
@@ -114,13 +114,13 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
     const combos = DIVISIONS_ORDER.flatMap((division) =>
       TOURNAMENT_ORDER.map((tournament) => ({ tournament, division }))
     );
-    const formats: ("pdf" | "png")[] = ["pdf", "png"];
+    const sizes: ("A" | "18x24")[] = ["A", "18x24"];
 
     setItems(
       combos.flatMap((c) =>
-        formats.map((f) => ({
-          key: `${c.tournament}-${c.division}-${f}`,
-          fileName: `${c.tournament} · ${c.division} · A.${f}`,
+        sizes.map((s) => ({
+          key: `${c.tournament}-${c.division}-${s}`,
+          fileName: `${c.tournament} · ${c.division} · ${s}.png`,
           status: "pending" as const,
         }))
       )
@@ -132,8 +132,11 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
     setModalOpen(true);
     setRunning(true);
 
+    // Every tweak except the per-combo tournament/division — forgetting one
+    // here silently exports with its default (the ballPlacement bug).
     const settings = {
       indicator: tweaks.indicator,
+      ballPlacement: tweaks.ballPlacement,
       perRow: tweaks.perRow,
       showNat: tweaks.showNat,
       showScore: tweaks.showScore,
@@ -151,7 +154,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
           body: JSON.stringify({
             combinations: chunk.map((c) => ({ ...c, clientKey: `${c.tournament}-${c.division}` })),
             settings,
-            formats,
+            sizes,
           }),
         });
         if (res.status === 401) {
@@ -271,19 +274,19 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
           <MenuHeading>Server render</MenuHeading>
           <button
             role="menuitem"
-            onClick={() => serverExport("pdf")}
+            onClick={() => serverExport("A")}
             className="interactive-lift w-full text-left px-2.5 py-1.5 rounded-md hover:bg-white/10"
           >
-            <div className="text-[11px] font-semibold text-white">PDF · Print master</div>
-            <div className="text-[10px] text-white/50">Vector, fonts embedded — Prodigi-ready</div>
+            <div className="text-[11px] font-semibold text-white">PNG · A size (300 DPI)</div>
+            <div className="text-[10px] text-white/50">ISO A-series ratio · 7128×10104 — Prodigi-ready</div>
           </button>
           <button
             role="menuitem"
-            onClick={() => serverExport("png")}
+            onClick={() => serverExport("18x24")}
             className="interactive-lift w-full text-left px-2.5 py-1.5 rounded-md hover:bg-white/10"
           >
-            <div className="text-[11px] font-semibold text-white">PNG · 300 DPI (server)</div>
-            <div className="text-[10px] text-white/50">Headless Chromium — byte-stable output</div>
+            <div className="text-[11px] font-semibold text-white">PNG · 18×24 (300 DPI)</div>
+            <div className="text-[10px] text-white/50">3:4 ratio · 5400×7200 — Prodigi-ready</div>
           </button>
 
           <MenuHeading>Pipeline</MenuHeading>
@@ -293,7 +296,7 @@ export function PrintControls({ svgRef, filename, tweaks, viz }: Props) {
             className="interactive-lift w-full text-left px-2.5 py-1.5 rounded-md hover:bg-white/10"
           >
             <div className="text-[11px] font-semibold text-white">Export series to Drive</div>
-            <div className="text-[10px] text-white/50">All 8 posters · A.pdf + A.png → prodigi intake</div>
+            <div className="text-[10px] text-white/50">All 8 posters · A.png + 18×24.png → prodigi intake</div>
           </button>
         </div>
       )}

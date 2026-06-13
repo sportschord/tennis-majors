@@ -17,6 +17,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { TENNIS_DATA } from "../src/lib/data";
 import { TOURNAMENTS, DIVISIONS } from "../src/lib/tournaments";
+import { countPriorTitles } from "../src/lib/utils";
 import type { Division, TournamentKey } from "../src/lib/types";
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
@@ -50,13 +51,26 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
   const TITLE_W = 1000;
   const footerTitleText = `${tourn.name.toUpperCase()} CHAMPIONS`;
   const titleBaseline = footerTop + 118;
+  // header left run (matches poster.tsx line ~126), at ~10.2 viz px/char.
+  const headerText = `OPEN ERA · ${data[0].year}–${data[data.length - 1].year} · CHAMPIONS & FINAL SCORES`;
+  // prior-title balls (indicator "curl", placement "overlap" — the crown).
+  const ballR = 5.8;
+  const orbit = radius + 1.5;
   // --------------------------------
 
-  const cells = data.map((_row, i) => ({
-    cx: round(PAD_X + yearStripW + cellW * ((i % cols) + 0.5)),
-    cy: round(gridTop + cellH * (Math.floor(i / cols) + 0.5)),
-    r: round(radius),
-  }));
+  const cells: Array<{ cx: number; cy: number; r: number }> = [];
+  const balls: Array<{ cx: number; cy: number; r: number }> = [];
+  data.forEach((_row, i) => {
+    const cx = PAD_X + yearStripW + cellW * ((i % cols) + 0.5);
+    const cy = gridTop + cellH * (Math.floor(i / cols) + 0.5);
+    cells.push({ cx: round(cx), cy: round(cy), r: round(radius) });
+    const prior = countPriorTitles(data, i);
+    for (let j = 0; j < prior; j++) {
+      const deg = -90 + Math.ceil(j / 2) * (j % 2 === 1 ? 1 : -1) * 15;
+      const a = (deg * Math.PI) / 180;
+      balls.push({ cx: round(cx + Math.cos(a) * orbit), cy: round(cy + Math.sin(a) * orbit), r: round(ballR) });
+    }
+  });
 
   return {
     schemaVersion: 1 as const,
@@ -72,10 +86,13 @@ function buildPosterDoc(tournament: TournamentKey, division: Division, perRow: n
     // Court-frame: the white margin (width FRAME) wraps the colour field; trace
     // its centreline so the printed tramline reveals cleanly all the way round.
     frame: { x: round(FRAME / 2), y: round(FRAME / 2), width: round(W - FRAME), height: round(fieldBottom), strokeWidth: FRAME },
-    // Top header strip ("OPEN ERA · … · CHAMPIONS & FINAL SCORES" + legend).
-    header: { x: PAD_X + yearStripW, y: 44, width: W - PAD_X * 2 - yearStripW, height: 22 },
+    // Top-left header run — tight box + char count so it can TYPE out (legend at
+    // far right is left to the full-print fade).
+    header: { x: PAD_X + yearStripW, y: 44, width: Math.round(headerText.length * 10.2), height: 22, steps: headerText.length },
     // Footer title box (typed char-by-char). steps = character count of the title.
     footerTitle: { x: (W - TITLE_W) / 2, y: Math.round(titleBaseline - 78), width: TITLE_W, height: 100, steps: footerTitleText.length },
+    // Prior-title balls — applied last as a shimmering crown over the circles.
+    balls,
   };
 }
 
@@ -96,7 +113,7 @@ function main(): void {
   const file = path.join(outDir, "tennis-posters.viz.json");
   fs.writeFileSync(file, JSON.stringify(collection));
   console.log(`wrote ${file} — ${items.length} items`);
-  for (const it of items) console.log(`  ${it.key}: ${it.cells.length} circles, r=${it.cells[0]?.r}, lastCy=${it.cells[it.cells.length - 1]?.cy}, bg=${it.styling.background}`);
+  for (const it of items) console.log(`  ${it.key}: ${it.cells.length} circles, ${it.balls.length} balls, header steps=${it.header.steps}/w=${it.header.width}`);
 }
 
 main();

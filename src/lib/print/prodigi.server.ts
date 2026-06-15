@@ -1,4 +1,4 @@
-import { SECTION_FOLDER } from "./options";
+import { ORCHESTRATOR_SECTION } from "./options";
 
 /**
  * Machine-to-machine bridge to the prints-orchestrator
@@ -44,7 +44,7 @@ export function getProdigiConfig(): ProdigiConfig | null {
 }
 
 export function buildIntakeAsset(designName: string, filename: string, googleDriveFileId: string): ProdigiIntakeAsset {
-  return { section: SECTION_FOLDER, designName, filename, googleDriveFileId };
+  return { section: ORCHESTRATOR_SECTION, designName, filename, googleDriveFileId };
 }
 
 async function prodigiFetch(config: ProdigiConfig, path: string, init?: RequestInit): Promise<Response> {

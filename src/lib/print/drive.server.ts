@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { google, type drive_v3 } from "googleapis";
-import { buildDesignFolderName, masterFileName, SECTION_FOLDER, type PrintRenderOptions } from "./options";
+import { buildDesignFolderName, CATEGORY_FOLDER, masterFileName, SECTION_FOLDER, type PrintRenderOptions } from "./options";
 import type { RenderedPrint } from "./render.server";
 
 /**
@@ -8,7 +8,7 @@ import type { RenderedPrint } from "./render.server";
  * and emitting the prints-orchestrator's intake structure instead of
  * f1app's flat naming:
  *
- *   {GOOGLE_DRIVE_FOLDER_ID}/Tennis Majors/{design name}/A.pdf|A.png
+ *   {GOOGLE_DRIVE_FOLDER_ID = Import Drive}/Tennis/Tennis Majors/{design name}/A.pdf|A.png
  *
  * The "A" file stem is what the orchestrator's aspect-ratio detection
  * expects for A-series prints; the design folder name becomes the
@@ -140,7 +140,10 @@ export async function uploadPrintToDrive(rendered: RenderedPrint): Promise<Drive
   }
 
   const drive = getDriveClient(config);
-  const folderPath = [SECTION_FOLDER, buildDesignFolderName(options)];
+  // Full category/section/design chain so the tree matches the canonical
+  // Import Drive layout (Tennis / Tennis Majors / <design>) and a manual scan
+  // of the Import Drive root derives the same section as the M2M push.
+  const folderPath = [CATEGORY_FOLDER, SECTION_FOLDER, buildDesignFolderName(options)];
 
   let parentId = config.rootFolderId;
   for (const folderName of folderPath) {

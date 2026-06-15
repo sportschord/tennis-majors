@@ -22,8 +22,18 @@ export interface PrintRenderOptions {
 /** Pixels per mm at CSS 96dpi — used to size PDF pages from mm dimensions. */
 const CSS_PX_PER_MM = 96 / 25.4;
 
-/** Drive section folder — also the `section` the prints-orchestrator ingests. */
+/** Top-level category folder under the shared "Import Drive" base. */
+export const CATEGORY_FOLDER = "Tennis";
+/** Drive section folder (nested under the category). */
 export const SECTION_FOLDER = "Tennis Majors";
+/**
+ * The `section` string the prints-orchestrator stores for an M2M push. It MUST
+ * equal the Drive folder chain above the design, joined the way the
+ * orchestrator's folder walk joins levels (" / "), so a machine push and a
+ * manual scan of the Import Drive root converge on the same catalog path
+ * (`Tennis / Tennis Majors/<design>`).
+ */
+export const ORCHESTRATOR_SECTION = `${CATEGORY_FOLDER} / ${SECTION_FOLDER}`;
 
 export function parsePrintOptions(params: URLSearchParams): PrintRenderOptions {
   const { tweaks, viz } = decodeState(params.toString());

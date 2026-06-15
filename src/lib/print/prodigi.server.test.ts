@@ -11,7 +11,7 @@ afterEach(() => {
 describe("buildIntakeAsset", () => {
   it("emits the orchestrator's explicit-assets shape", () => {
     expect(buildIntakeAsset("Wimbledon Champions (Women's)", "A.pdf", "drive-file-id")).toEqual({
-      section: "Tennis Majors",
+      section: "Tennis / Tennis Majors",
       designName: "Wimbledon Champions (Women's)",
       filename: "A.pdf",
       googleDriveFileId: "drive-file-id",
